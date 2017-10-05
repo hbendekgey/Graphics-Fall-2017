@@ -2,13 +2,11 @@
 let GameObject = function(mesh, gemType, i, j) { 
   this.mesh = mesh;
   this.gemType = gemType;
-
   this.position = new Vec3(0, 0, 0); 
   this.orientation = 0; 
   this.scale = 1; 
   this.i = i;
   this.j = j;
-
   this.modelMatrix = new Mat4(); 
 };
 

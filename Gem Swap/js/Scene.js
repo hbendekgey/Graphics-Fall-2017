@@ -84,7 +84,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   }
 
   // if there are gems to remove, disable player interactions
-  if (this.gemsToRemove.length > 0) {
+  if (this.gemsToRemove.length) {
     this.disableListeners = true;
   }
 
@@ -242,8 +242,6 @@ Scene.prototype.dropGem = function(x,y) {
 Scene.prototype.bomb = function(x,y) {
   let i = Math.floor(5 * x + .5);
   let j = Math.floor(5 * y + .5);
-  console.log("column: " + i + " row: " + j);
-  console.log("gem in bottom left thinks it is " + "column: " + this.gameObjects[0][0].i + " row: " + this.gameObjects[0][0].j);
   if (i >= 0 && i < 10 && j >= 0 && j < 10) {
     if (!this.gemsToRemove.includes(this.gameObjects[i][j])) {
       this.gemsToRemove.push(this.gameObjects[i][j]);

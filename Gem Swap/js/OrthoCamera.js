@@ -16,8 +16,7 @@ OrthoCamera.prototype.updateViewProjMatrix = function(){
     invert(); 
 }; 
 
-OrthoCamera.prototype.setAspectRatio = function(ar) 
-{ 
+OrthoCamera.prototype.setAspectRatio = function(ar) { 
   this.windowSize.x = this.windowSize.y * ar;
   this.updateViewProjMatrix();
 }; 

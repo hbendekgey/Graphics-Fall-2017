@@ -7,16 +7,13 @@ let App = function(canvas, overlay) {
 	this.gl = canvas.getContext("experimental-webgl");
 	if (this.gl === null) {
 		throw new Error("Browser does not support WebGL");
-
 	}
-	// create a simple scene
-	this.scene = new Scene(this.gl);
-
-	this.resize();
 
 	this.gl.pendingResources = {};
-
 	this.keysPressed = {};
+
+	this.scene = new Scene(this.gl);
+	this.resize();
 };
 
 // match WebGL rendering resolution and viewport to the canvas size
