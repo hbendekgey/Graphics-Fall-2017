@@ -6,11 +6,11 @@ let HeartGeometry = function(gl) {
   this.vertexBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 
-  let vertices = new Float32Array(63);
+  let vertices = new Float32Array(93);
   vertices[0] = 0;
   vertices[1] = 0;
   vertices[2] = 1;
-  for (var i = 1; i <= 20; i++) {
+  for (var i = 1; i <= 30; i++) {
     vertices[3 * i] = x(i);
     vertices[3 * i + 1] = y(i);
     vertices[3 * i + 2] = 1;
@@ -19,23 +19,23 @@ let HeartGeometry = function(gl) {
   gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
   function x(t) {
-    return Math.pow(Math.sin(t * Math.PI / 10), 3) / 12.5;
+    return Math.pow(Math.sin(t * Math.PI / 15), 3) / 12.5;
   }
 
   function y(t) {
-    return (13 * Math.cos(t * Math.PI / 10) - 5 * Math.cos(2 * t * Math.PI / 10) - 2 * Math.cos(3 * t * Math.PI / 10) 
-               - Math.cos(4 * t * Math.PI / 10)) / 200;
+    return (13 * Math.cos(t * Math.PI / 15) - 5 * Math.cos(2 * t * Math.PI / 15) - 2 * Math.cos(3 * t * Math.PI / 15) 
+               - Math.cos(4 * t * Math.PI / 15)) / 200;
   }
 
   //color buffer   
   this.colorBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
 
-  let colors = new Float32Array(63);
+  let colors = new Float32Array(93);
   colors[0] = 0.5;
   colors[1] = 0;
   colors[2] = 0;
-  for (var i = 1; i <= 20; i++) {
+  for (var i = 1; i <= 30; i++) {
     colors[3 * i] = 0.9;
     colors[3 * i + 1] = 0.3;
     colors[3 * i + 2] = 0.4;
@@ -47,11 +47,11 @@ let HeartGeometry = function(gl) {
   this.indexBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 
-  let indices = new Uint16Array(60);
-  for (var i = 0; i < 20; i++) {
+  let indices = new Uint16Array(90);
+  for (var i = 0; i < 30; i++) {
     indices[3 * i] = 0;
     indices[3 * i + 1] = i + 1;
-    indices[3 * i + 2] = (i + 1) % 20 + 1;
+    indices[3 * i + 2] = (i + 1) % 30 + 1;
   }
 
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
@@ -82,5 +82,5 @@ HeartGeometry.prototype.draw = function() {
   // set index buffer to pipeline input
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
 
-  gl.drawElements(gl.TRIANGLES, 60, gl.UNSIGNED_SHORT, 0);
+  gl.drawElements(gl.TRIANGLES, 90, gl.UNSIGNED_SHORT, 0);
 };
