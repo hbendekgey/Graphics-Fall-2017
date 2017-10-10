@@ -29,10 +29,10 @@ this.vertexNormalBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexTexCoordBuffer); 
   gl.bufferData(gl.ARRAY_BUFFER, 
     new Float32Array([ 
-         0, 1, 
+         0, 1/6, 
          0, 0, 
-         1, 0, 
-         1, 1, 
+         1/6, 0, 
+         1/6, 1/6, 
     ]), 
     gl.STATIC_DRAW);
 

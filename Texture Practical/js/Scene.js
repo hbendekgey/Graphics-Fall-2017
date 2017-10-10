@@ -7,7 +7,7 @@ let Scene = function(gl) {
   this.vsTexture = new Shader(gl, gl.VERTEX_SHADER, "texture_vs.essl");
   this.fsTexture = new Shader(gl, gl.FRAGMENT_SHADER, "texture_fs.essl");
   this.textureProgram = new TexturedProgram(gl, this.vsTexture, this.fsTexture);
-  this.texture2D = new Texture2D(gl, "media/asteroid.png");
+  this.texture2D = new Texture2D(gl, "media/boom.png");
 
   this.heartMaterial = new Material(gl, this.solidProgram);
   this.heartMaterial.time.set(0);
@@ -15,6 +15,7 @@ let Scene = function(gl) {
   this.staticMaterial.time.set(0);
   this.textureMaterial = new Material(gl, this.textureProgram);
   this.textureMaterial.colorTexture.set(this.texture2D);
+  this.textureMaterial.boomPhase.set(new Vec2(0,0));
 
   this.starGeometry = new StarGeometry(gl);
   this.heartGeometry = new HeartGeometry(gl);
@@ -35,6 +36,7 @@ let Scene = function(gl) {
   this.timeAtLastFrame = new Date().getTime();
   this.selected = {};
   this.stableRotation = 0;
+  this.boomCounter = 0;
 
   for (var i = 0; i < 10; i++) {
     this.gameObjects.push([]);
@@ -149,6 +151,10 @@ Scene.prototype.update = function(gl, keysPressed) {
       this.gemsToCheck.shift();
     }
   }
+
+  // animate boom
+  this.textureMaterial.boomPhase.set((Math.floor(this.boomCounter)%6), Math.floor(this.boomCounter/6)).mul(1/6);
+  this.boomCounter = (this.boomCounter + dt * 20) % 36;
 
   // draw all gems, rotating the gears and deleting some if quaking
   for (var i = 0; i < this.gameObjects.length; i++) {
