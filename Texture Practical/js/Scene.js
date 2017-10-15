@@ -153,7 +153,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   }
 
   // animate boom
-  this.textureMaterial.boomPhase.set((Math.floor(this.boomCounter)%6), Math.floor(this.boomCounter/6)).mul(1/6);
+  this.textureMaterial.boomPhase.set((Math.floor(this.boomCounter)%6), Math.floor(this.boomCounter/6)).mul(1/6)
   this.boomCounter = (this.boomCounter + dt * 20) % 36;
 
   // draw all gems, rotating the gears and deleting some if quaking
