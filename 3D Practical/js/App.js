@@ -39,9 +39,11 @@ App.prototype.registerEventHandlers = function() {
 		theApp.keysPressed[keyboardMap[event.keyCode]] = false;
 	};
 	this.canvas.onmousedown = function(event) {
+		theApp.scene.camera.mouseDown();
 
 	};
 	this.canvas.onmousemove = function(event) {
+		theApp.scene.camera.mouseMove(event);
 
 	};
 	this.canvas.onmouseout = function(event) {
@@ -49,6 +51,7 @@ App.prototype.registerEventHandlers = function() {
 
 	};
 	this.canvas.onmouseup = function(event) {
+		theApp.scene.camera.mouseUp();
 
 	};
 	window.addEventListener('resize', function() {

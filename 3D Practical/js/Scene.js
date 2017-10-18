@@ -16,8 +16,7 @@ let Scene = function(gl) {
   this.gameObject = new GameObject(this.multiMesh);
 
   this.timeAtLastFrame = new Date().getTime();
-  this.camera = new OrthoCamera();
-  this.camera.updateViewProjMatrix();
+  this.camera = new PerspectiveCamera();
 };
 
 Scene.prototype.update = function(gl, keysPressed) {
