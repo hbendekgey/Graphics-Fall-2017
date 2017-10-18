@@ -18,11 +18,12 @@ this.vertexNormalBuffer = gl.createBuffer();
   this.vertexTexCoordBuffer = gl.createBuffer(); 
   gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexTexCoordBuffer); 
   gl.bufferData(gl.ARRAY_BUFFER, 
-    new Float32Array(jsonObject.texturecoords), 
+    new Float32Array(jsonObject.texturecoords[0]), 
     gl.STATIC_DRAW);
 
   var indices = [].concat.apply([], jsonObject.faces)
   this.numIndices = indices.length;
+
   // index buffer
   this.indexBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
