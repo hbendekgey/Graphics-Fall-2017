@@ -1,6 +1,7 @@
 let MultiMesh = function(
     gl, jsonModelFileUrl, materials) { 
   this.meshes = []; 
+  this.materials = materials;
   
   let request = new XMLHttpRequest(); 
   request.open("GET", jsonModelFileUrl); 
@@ -20,6 +21,12 @@ let MultiMesh = function(
   }; 
   request.send(); 
 }; 
+
+MultiMesh.prototype.setUniform = function(uniformName, uniformVal){
+  this.materials.forEach( function(material) {
+    material[uniformName].set(uniformVal);
+  });
+};
 
 MultiMesh.prototype.draw = function(gl){ 
   for (let i = 0; i < this.meshes.length; i++) { 
