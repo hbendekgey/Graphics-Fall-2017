@@ -14,9 +14,11 @@ let Scene = function(gl) {
 
   this.multiMesh = new MultiMesh(gl, "media/Slowpoke.json", this.materials);
   this.gameObject = new GameObject(this.multiMesh);
+  
+  this.camera = new PerspectiveCamera();
+  gl.enable(gl.DEPTH_TEST);
 
   this.timeAtLastFrame = new Date().getTime();
-  this.camera = new PerspectiveCamera();
 };
 
 Scene.prototype.update = function(gl, keysPressed) {
@@ -29,8 +31,9 @@ Scene.prototype.update = function(gl, keysPressed) {
 
   // clear the screen
   gl.clearColor(0.2, 0, 0.2, 1.0);
-  gl.clearDepth(0.5);
+  gl.clearDepth(1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+  this.camera.move(dt, keysPressed);
   this.gameObject.draw(this.camera);
 };

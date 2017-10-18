@@ -44,7 +44,7 @@ App.prototype.registerEventHandlers = function() {
 	};
 	this.canvas.onmousemove = function(event) {
 		theApp.scene.camera.mouseMove(event);
-
+		event.stopPropagation();
 	};
 	this.canvas.onmouseout = function(event) {
 		//jshint unused:false
