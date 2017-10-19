@@ -17,6 +17,7 @@ let Scene = function(gl) {
   
   this.camera = new PerspectiveCamera();
   gl.enable(gl.DEPTH_TEST);
+  Material.lightDirection.set(new Vec3(0,1,0));
 
   this.timeAtLastFrame = new Date().getTime();
 };

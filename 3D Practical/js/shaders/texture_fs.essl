@@ -5,12 +5,18 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	varying vec2 texCoord; 
 	uniform sampler2D colorTexture; 
 
-	// for shading
-	varying vec4 worldNormal;
-	varying vec4 worldPos;
+	// for shading according to light source
+	varying vec3 worldNormal;
+	uniform vec3 lightDirection;
+
+	// We're not using this right now
+	varying vec3 worldPos;
 
 	void main(void) {
 		//gl_FragColor = texture2D(colorTexture, texCoord);
-		gl_FragColor = abs(worldNormal / length(worldNormal)) + vec4(0,0,0,1);
+		gl_FragColor = vec4(abs(normalize(worldNormal)),1);
+		
+		float cos = dot(normalize(worldNormal), normalize(lightDirection));
+		//gl_FragColor = vec4(max(cos, 0.0) * texture2D(colorTexture, texCoord).xyz, 1);
 	}
 `;
