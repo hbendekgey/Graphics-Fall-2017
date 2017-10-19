@@ -16,6 +16,6 @@ GameObject.prototype.updateModelMatrix =
 
 GameObject.prototype.draw = function(camera){ 
   this.updateModelMatrix();
-  this.mesh.setUniform("modelViewProjMatrix", this.modelMatrix.mul(camera.viewProjMatrix));
+  Material.modelViewProjMatrix.set(this.modelMatrix).mul(camera.viewProjMatrix);
   this.mesh.draw(); 
 };

@@ -8,8 +8,9 @@ let Material = function(gl, program) {
     let reflectionVariable = 
         UniformReflectionFactories.makeVar(gl,
                                 uniform.type, uniform.size, uniform.textureUnit); 
-    Object.defineProperty(theMaterial, uniformName,
-        {value: reflectionVariable} ); 
+    if(!Material[uniformName]) {
+      Object.defineProperty(theMaterial, uniformName, {value: reflectionVariable}); 
+    }
   }); 
 
   return new Proxy(this, { 
@@ -30,7 +31,9 @@ Material.prototype.commit = function() {
   let theMaterial = this; 
   Object.keys(this.program.uniforms).forEach( function(uniformName) { 
     let uniform = theMaterial.program.uniforms[uniformName]; 
-    theMaterial[uniformName].commit(gl, uniform.location); 
+    let reflectionVariable = Material[uniformName] || 
+                             theMaterial[uniformName]; 
+    reflectionVariable.commit(gl, uniform.location);
   }); 
 }; 
 
@@ -42,3 +45,5 @@ Material.dummy = new Proxy(new Function(), {
     return Material.dummy; 
   }, 
 });
+
+Object.defineProperty(Material, "modelViewProjMatrix", {value: new Mat4()} );
