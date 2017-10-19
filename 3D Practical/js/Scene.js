@@ -3,8 +3,8 @@ let Scene = function(gl) {
   this.vsTexture = new Shader(gl, gl.VERTEX_SHADER, "texture_vs.essl");
   this.fsTexture = new Shader(gl, gl.FRAGMENT_SHADER, "texture_fs.essl");
   this.textureProgram = new TexturedProgram(gl, this.vsTexture, this.fsTexture);
-  this.texture2DEye = new Texture2D(gl, "media/SlowpokeEye.png");
-  this.texture2DBody = new Texture2D(gl, "media/SlowpokeBody.png");
+  this.texture2DEye = new Texture2D(gl, "media/YadonEyeDh.png");
+  this.texture2DBody = new Texture2D(gl, "media/YadonDh.png");
 
   this.materials = [];
   this.materials.push(new Material(gl, this.textureProgram));
