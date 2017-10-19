@@ -19,6 +19,8 @@ let Scene = function(gl) {
   this.gameObjects.push(new GameObject(this.multiMesh));
   this.gameObjects[1].position.set(new Vec3(8, 0, 0));
   this.gameObjects[2].position.set(new Vec3(-8, 0, 0));
+  this.gameObjects[1].orientation = Math.PI;
+  this.gameObjects[2].orientation = Math.PI;
 
   this.camera = new PerspectiveCamera();
   this.camera.position.set(0,3,12);

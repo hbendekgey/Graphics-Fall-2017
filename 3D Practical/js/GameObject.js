@@ -4,14 +4,15 @@ let GameObject = function(mesh) {
 
   this.position = new Vec3(0, 0, 0); 
   this.orientation = 0; 
-  this.scale = 1; 
+  this.rotationAxis = new Vec3(0,0,1);
+  this.scale = new Vec3(1,1,1); 
 
   this.modelMatrix = new Mat4(); 
 };
 
 GameObject.prototype.updateModelMatrix =
                               function(){ 
-  this.modelMatrix.set().rotate(this.orientation).scale(this.scale).translate(this.position); 
+  this.modelMatrix.set().rotate(this.orientation, this.axis).scale(this.scale).translate(this.position); 
 };
 
 GameObject.prototype.draw = function(camera){ 

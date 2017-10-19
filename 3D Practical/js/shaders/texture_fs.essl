@@ -12,10 +12,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	// We're not using this right now
 	varying vec3 worldPos;
 
-	void main(void) {
-		//gl_FragColor = texture2D(colorTexture, texCoord);
-		//gl_FragColor = vec4(abs(normalize(worldNormal)),1);
-		
+	void main(void) {		
 		float cos = dot(normalize(worldNormal), normalize(lightDirection));
 		gl_FragColor = vec4(max(cos, 0.0) * texture2D(colorTexture, texCoord).xyz, 1);
 	}
