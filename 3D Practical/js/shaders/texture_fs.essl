@@ -14,9 +14,9 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 
 	void main(void) {
 		//gl_FragColor = texture2D(colorTexture, texCoord);
-		gl_FragColor = vec4(abs(normalize(worldNormal)),1);
+		//gl_FragColor = vec4(abs(normalize(worldNormal)),1);
 		
 		float cos = dot(normalize(worldNormal), normalize(lightDirection));
-		//gl_FragColor = vec4(max(cos, 0.0) * texture2D(colorTexture, texCoord).xyz, 1);
+		gl_FragColor = vec4(max(cos, 0.0) * texture2D(colorTexture, texCoord).xyz, 1);
 	}
 `;

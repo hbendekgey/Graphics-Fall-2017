@@ -13,9 +13,16 @@ let Scene = function(gl) {
   this.materials[1].colorTexture.set(this.texture2DEye);
 
   this.multiMesh = new MultiMesh(gl, "media/Slowpoke.json", this.materials);
-  this.gameObject = new GameObject(this.multiMesh);
-  
+  this.gameObjects = []
+  this.gameObjects.push(new GameObject(this.multiMesh));
+  this.gameObjects.push(new GameObject(this.multiMesh));
+  this.gameObjects.push(new GameObject(this.multiMesh));
+  this.gameObjects[1].position.set(new Vec3(8, 0, 0));
+  this.gameObjects[2].position.set(new Vec3(-8, 0, 0));
+
   this.camera = new PerspectiveCamera();
+  this.camera.position.set(0,3,12);
+
   gl.enable(gl.DEPTH_TEST);
   Material.lightDirection.set(new Vec3(0,1,0));
 
@@ -36,5 +43,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   this.camera.move(dt, keysPressed);
-  this.gameObject.draw(this.camera);
+  for (var i = 0; i < this.gameObjects.length; i++) {
+    this.gameObjects[i].draw(this.camera);
+  }
 };
