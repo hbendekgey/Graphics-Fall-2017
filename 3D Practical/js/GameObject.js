@@ -16,6 +16,8 @@ GameObject.prototype.updateModelMatrix =
 
 GameObject.prototype.draw = function(camera){ 
   this.updateModelMatrix();
+  Material.modelMatrix.set(this.modelMatrix);
+  Material.modelMatrixInverse.set(new Mat4(this.modelMatrix).invert());
   Material.modelViewProjMatrix.set(this.modelMatrix).mul(camera.viewProjMatrix);
   this.mesh.draw(); 
 };

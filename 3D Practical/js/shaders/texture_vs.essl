@@ -1,12 +1,24 @@
 Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	attribute vec3 vertexPosition;
-	attribute vec3 vertexNormal;
+	uniform mat4 modelViewProjMatrix;
+
+	// for mapping texture coordinates onto the object
 	attribute vec2 vertexTexCoord;
 	varying vec2 texCoord;
-	uniform mat4 modelViewProjMatrix;
+
+	// for shading, transforms position from model to world 
+	uniform mat4 modelMatrix;
+	varying vec4 worldPos;
+
+	// for shading, transforms normals from model to world
+	attribute vec3 vertexNormal;
+	uniform mat4 modelMatrixInverse;
+	varying vec4 worldNormal;
 
 	void main(void) {
 		texCoord = vertexTexCoord;
 		gl_Position = vec4(vertexPosition, 1) * modelViewProjMatrix;
+		worldPos = vec4(vertexPosition, 1) * modelMatrix;
+		worldNormal = modelMatrixInverse * vec4(vertexNormal, 0);
 	}
 `;

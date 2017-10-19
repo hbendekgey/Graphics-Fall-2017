@@ -46,4 +46,6 @@ Material.dummy = new Proxy(new Function(), {
   }, 
 });
 
+Object.defineProperty(Material, "modelMatrix", {value: new Mat4()} );
+Object.defineProperty(Material, "modelMatrixInverse", {value: new Mat4()} );
 Object.defineProperty(Material, "modelViewProjMatrix", {value: new Mat4()} );
