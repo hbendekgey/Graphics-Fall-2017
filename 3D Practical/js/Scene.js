@@ -26,7 +26,8 @@ let Scene = function(gl) {
   this.camera.position.set(0,3,12);
 
   gl.enable(gl.DEPTH_TEST);
-  Material.lightDirection.set(new Vec3(0,1,0));
+
+  this.lightDirection = new Vec3(0,1,0);
 
   this.timeAtLastFrame = new Date().getTime();
 };
@@ -46,6 +47,6 @@ Scene.prototype.update = function(gl, keysPressed) {
 
   this.camera.move(dt, keysPressed);
   for (var i = 0; i < this.gameObjects.length; i++) {
-    this.gameObjects[i].draw(this.camera);
+    this.gameObjects[i].draw(this.camera, this.lightDirection);
   }
 };
