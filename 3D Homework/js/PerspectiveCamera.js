@@ -13,7 +13,7 @@ var PerspectiveCamera = function()
   this.farPlane = 1000.0; 
 
   // Properties for motion
-  this.speed = 4; 
+  this.speed = 10; 
   
   this.isDragging = false; 
   this.mouseDelta = new Vec2(0.0, 0.0); 
@@ -98,11 +98,6 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed) {
 }; 
 
 PerspectiveCamera.prototype.mouseDown = function() { 
-  console.log("Info:")
-  console.log(this.position)
-  console.log(this.yaw)
-  console.log(this.pitch)
-
   this.isDragging = true; 
   this.mouseDelta.set(); 
 }; 
