@@ -53,7 +53,7 @@ PerspectiveCamera.prototype.updateProjMatrix = function(){
                       mul(this.projMatrix); 
 }; 
 
-PerspectiveCamera.prototype.move = function(dt, keysPressed) { 
+PerspectiveCamera.prototype.move = function(dt, keysPressed, avatar) { 
   if(this.isDragging){ 
     this.yaw -= this.mouseDelta.x * 0.002; 
     this.pitch -= this.mouseDelta.y * 0.002; 
@@ -76,23 +76,28 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed) {
   } 
 
   if(keysPressed.W) { 
-    this.position.addScaled(this.speed * dt, this.ahead); 
+    avatar.position.addScaled(this.speed * dt, this.ahead); 
   } 
   if(keysPressed.S) { 
-    this.position.addScaled(-this.speed * dt, this.ahead); 
+    avatar.position.addScaled(-this.speed * dt, this.ahead); 
   } 
   if(keysPressed.D) { 
-    this.position.addScaled(this.speed * dt, this.right); 
+    avatar.position.addScaled(this.speed * dt, this.right); 
   } 
   if(keysPressed.A) { 
-    this.position.addScaled(-this.speed * dt, this.right); 
+    avatar.position.addScaled(-this.speed * dt, this.right); 
   } 
   if(keysPressed.E) { 
-    this.position.addScaled(this.speed * dt, PerspectiveCamera.worldUp); 
+    avatar.position.addScaled(this.speed * dt, PerspectiveCamera.worldUp); 
   } 
   if(keysPressed.Q) { 
-    this.position.addScaled(-this.speed * dt, PerspectiveCamera.worldUp); 
+    avatar.position.addScaled(-this.speed * dt, PerspectiveCamera.worldUp); 
   } 
+  this.position.set(avatar.position).addScaled(-30, this.ahead).addScaled(5, this.right);
+  avatar.pitch = this.pitch;
+  avatar.right = this.right;
+  avatar.yaw = this.yaw + Math.PI;
+
 
   this.updateViewMatrix(); 
 }; 

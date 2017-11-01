@@ -12,13 +12,11 @@ let Scene = function(gl) {
 
   this.heliMultiMesh = new MultiMesh(gl, "media/heli/heli1.json", this.heliMaterials);
   this.avatar = new GameObject(this.heliMultiMesh);
-  this.avatar.rotationAxis.set(new Vec3(0,1,0));
-  this.avatar.orientation = Math.PI;
-  this.avatar.position.set(new Vec3 (0,-25,-30));
-  this.avatar.scale.set(new Vec3 (0.5, 0.5, 0.5));
+  // this.avatar.yaw = Math.PI/2;
+  this.avatar.scale.mul(0.5);
 
   this.groundMaterial = new Material(gl, this.textureProgram);
-  this.groundMaterial.colorTexture.set(new Texture2D(gl, "media/tree/tree.png"));
+  this.groundMaterial.colorTexture.set(new Texture2D(gl, "media/bricks.png"));
   this.textureGeometry = new TexturedQuadGeometry(gl);
 
   this.gameObjects = [];
@@ -27,7 +25,7 @@ let Scene = function(gl) {
   this.camera = new PerspectiveCamera();
   this.camera.pitch = (-1.0/2);
   this.camera.isDragging = true;
-  this.camera.move(1, []);
+  this.camera.move(1, [], this.avatar);
   this.camera.isDragging = false;
 
   gl.enable(gl.DEPTH_TEST);
@@ -50,7 +48,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   gl.clearDepth(1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  this.camera.move(dt, keysPressed);
+  this.camera.move(dt, keysPressed, this.avatar);
   this.avatar.draw(this.camera, this.lightDirection);
 
   for (var i = 0; i < this.gameObjects.length; i++) {

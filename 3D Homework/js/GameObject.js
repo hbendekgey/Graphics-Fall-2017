@@ -3,8 +3,10 @@ let GameObject = function(mesh) {
   this.mesh = mesh;
 
   this.position = new Vec3(0, 0, 0); 
-  this.orientation = 0; 
-  this.rotationAxis = new Vec3(0,0,1);
+  this.yaw = 0;
+  this.pitch = 0;
+  this.roll = 0;
+  this.right = new Vec3(0,0,1);
   this.scale = new Vec3(1,1,1); 
 
   this.modelMatrix = new Mat4(); 
@@ -12,7 +14,7 @@ let GameObject = function(mesh) {
 
 GameObject.prototype.updateModelMatrix =
                               function(){ 
-  this.modelMatrix.set().rotate(this.orientation, this.rotationAxis).scale(this.scale).translate(this.position); 
+  this.modelMatrix.set().rotate(this.yaw,0,1,0).rotate(this.pitch,this.right).scale(this.scale).translate(this.position); 
 };
 
 GameObject.prototype.draw = function(camera, lightDirection){ 
