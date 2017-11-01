@@ -63,6 +63,12 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed, avatar) {
     if(this.pitch < -3.14/2.0) { 
       this.pitch = -3.14/2.0; 
     } 
+  }
+  if (avatar.position.y < 12 && this.pitch < -0.5) {
+    this.pitch +=0.02;
+    this.pitchChanged = true;
+  }
+  if(this.isDragging || this.pitchChanged) {
     this.mouseDelta = new Vec2(0.0, 0.0); 
     this.ahead = new Vec3(
      -Math.sin(this.yaw)*Math.cos(this.pitch),
@@ -73,13 +79,21 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed, avatar) {
       PerspectiveCamera.worldUp ); 
     this.right.normalize(); 
     this.up.setVectorProduct(this.right, this.ahead); 
+    this.pitchChanged = false;
   } 
 
   if(keysPressed.W) { 
     avatar.position.addScaled(this.speed * dt, this.ahead); 
+    if (avatar.position.y < 5) {
+      avatar.position.mul(1,0,1).add(0,5,0);
+    }
   } 
   if(keysPressed.S) { 
     avatar.position.addScaled(-this.speed * dt, this.ahead); 
+    if (avatar.position.y < 5) {
+      avatar.position.mul(1,0,1).add(0,5,0);
+    }
+
   } 
   if(keysPressed.D) { 
     avatar.position.addScaled(this.speed * dt, this.right); 
@@ -92,6 +106,9 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed, avatar) {
   } 
   if(keysPressed.Q) { 
     avatar.position.addScaled(-this.speed * dt, PerspectiveCamera.worldUp); 
+    if (avatar.position.y < 5) {
+      avatar.position.mul(1,0,1).add(0,5,0);
+    }
   } 
   this.position.set(avatar.position).addScaled(-30, this.ahead).addScaled(5, this.right);
   avatar.pitch = this.pitch;
