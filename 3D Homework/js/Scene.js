@@ -87,7 +87,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   for (var i = 0; i < this.gameObjects.length; i++) {
     this.gameObjects[i].draw(this.camera);
   }
-  // this.gameObjects[0].draw(this.camera);
+  this.gameObjects[0].draw(this.camera);
 
   // this.shadowMaterial = new Material(gl,this.solidProgram);
   // this.shadowMaterial.commit();
