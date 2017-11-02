@@ -54,10 +54,14 @@ let Scene = function(gl) {
     this.gameObjects[i].position.addScaled(Math.random() - 0.5, new Vec3(0,0,1000));
   }
 
-
   gl.enable(gl.DEPTH_TEST);
 
-  this.lightDirection = new Vec3(0,1,0);
+  Material.lightPos.at(0).set(new Vec4(0,1,0,0)); // 0 if directional and 1 if point for vec4
+  Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
+  Material.lightPos.at(1).set(new Vec4(0,0,0,1)); // 0 if directional and 1 if point for vec4
+  Material.lightPowerDensity.at(1).set(new Vec3(10,100,1000));
+
+
 
   this.timeAtLastFrame = new Date().getTime();
 };
@@ -76,11 +80,19 @@ Scene.prototype.update = function(gl, keysPressed) {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   this.camera.move(dt, keysPressed, this.avatar);
-  this.avatar.draw(this.camera, this.lightDirection);
-  this.ground.draw(this.camera, this.lightDirection);
+  this.avatar.draw(this.camera);
+  this.ground.draw(this.camera);
   this.gameObjects[0].yaw += 0.1;
   
   for (var i = 0; i < this.gameObjects.length; i++) {
-    this.gameObjects[i].draw(this.camera, this.lightDirection);
+    this.gameObjects[i].draw(this.camera);
   }
+  // this.gameObjects[0].draw(this.camera);
+
+  // this.shadowMaterial = new Material(gl,this.solidProgram);
+  // this.shadowMaterial.commit();
+  // this.avatar.drawShadow(this.camera);
+  // for (var i = 0; i < this.gameObjects.length; i++) {
+  //   this.gameObjects[i].drawShadow(this.camera);
+  // }
 };

@@ -25,11 +25,20 @@ GameObject.prototype.updateModelMatrix = function() {
   }
 };
 
-GameObject.prototype.draw = function(camera, lightDirection){ 
+GameObject.prototype.draw = function(camera){ 
   this.updateModelMatrix();
-  Material.lightDirection.set(lightDirection); // 0 if directional and 1 if point for vec4
   Material.modelMatrix.set(this.modelMatrix);
   Material.modelMatrixInverse.set(new Mat4(this.modelMatrix).invert());
   Material.modelViewProjMatrix.set(this.modelMatrix).mul(camera.viewProjMatrix);
   this.mesh.draw(); 
 };
+
+
+GameObject.prototype.drawShadow = function(camera){ 
+  this.updateModelMatrix();
+  Material.modelMatrix.set(this.modelMatrix);
+  Material.modelMatrixInverse.set(new Mat4(this.modelMatrix).invert());
+  Material.modelViewProjMatrix.set(this.modelMatrix).scale(new Vec3(1,0,1)).translate(new Vec3(0,.01,0)).mul(camera.viewProjMatrix);
+  this.mesh.drawShadow(); 
+};
+

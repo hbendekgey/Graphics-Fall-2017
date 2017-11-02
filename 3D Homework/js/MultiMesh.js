@@ -32,4 +32,10 @@ MultiMesh.prototype.draw = function(gl){
   for (let i = 0; i < this.meshes.length; i++) { 
     this.meshes[i].draw(gl); 
   } 
-}; 
+};
+
+MultiMesh.prototype.drawShadow = function(){ 
+  for (let i = 0; i < this.meshes.length; i++) { 
+    this.meshes[i].drawShadow(); 
+  } 
+};

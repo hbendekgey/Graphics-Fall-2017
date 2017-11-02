@@ -12,3 +12,7 @@ Mesh.prototype.draw = function(){
   this.material.commit();
   this.geometry.draw();
 };
+
+Mesh.prototype.drawShadow = function(){
+  this.geometry.draw();
+};
