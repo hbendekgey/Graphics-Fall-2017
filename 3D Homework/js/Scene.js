@@ -59,7 +59,7 @@ let Scene = function(gl) {
   Material.lightPos.at(0).set(new Vec4(0,1,0,0)); // 0 if directional and 1 if point for vec4
   Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
   Material.lightPos.at(1).set(new Vec4(0,0,0,1)); // 0 if directional and 1 if point for vec4
-  Material.lightPowerDensity.at(1).set(new Vec3(10,100,1000));
+  Material.lightPowerDensity.at(1).set(new Vec3(5000,5000,5000));
 
 
 
@@ -75,7 +75,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   this.timeAtLastFrame = timeAtThisFrame;
 
   // clear the screen
-  gl.clearColor(0.2, 0, 0.2, 1.0);
+  gl.clearColor(0.5, 0.8, 0.92, 1.0);
   gl.clearDepth(1);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -87,7 +87,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   for (var i = 0; i < this.gameObjects.length; i++) {
     this.gameObjects[i].draw(this.camera);
   }
-  this.gameObjects[0].draw(this.camera);
+  // this.gameObjects[0].draw(this.camera);
 
   // this.shadowMaterial = new Material(gl,this.solidProgram);
   // this.shadowMaterial.commit();

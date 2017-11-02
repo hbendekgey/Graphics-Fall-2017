@@ -1,6 +1,7 @@
 "use strict"; 
-let GameObject = function(mesh) { 
+let GameObject = function(mesh, shadowMaterial) { 
   this.mesh = mesh;
+  this.shadowMaterial = shadowMaterial;
 
   this.position = new Vec3(0, 0, 0); 
   this.yaw = 0;
@@ -36,9 +37,9 @@ GameObject.prototype.draw = function(camera){
 
 GameObject.prototype.drawShadow = function(camera){ 
   this.updateModelMatrix();
-  Material.modelMatrix.set(this.modelMatrix);
-  Material.modelMatrixInverse.set(new Mat4(this.modelMatrix).invert());
-  Material.modelViewProjMatrix.set(this.modelMatrix).scale(new Vec3(1,0,1)).translate(new Vec3(0,.01,0)).mul(camera.viewProjMatrix);
+  this.shadowMaterial.modelMatrix.set(this.modelMatrix);
+  this.shadowMaterial.modelMatrixInverse.set(new Mat4(this.modelMatrix).invert());
+  this.shadowMaterial.modelViewProjMatrix.set(this.modelMatrix).scale(new Vec3(1,0,1)).translate(new Vec3(0,.01,0)).mul(camera.viewProjMatrix);
   this.mesh.drawShadow(); 
 };
 

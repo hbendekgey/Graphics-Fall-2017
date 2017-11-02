@@ -5,17 +5,20 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 
 	// for shading according to light source
 	varying vec3 worldNormal;
-	uniform vec4 lightPos[1];
-	uniform vec3 lightPowerDensity[1];
+	uniform vec4 lightPos[2];
+	uniform vec3 lightPowerDensity[2];
 
 	// We're not using this right now
 	varying vec3 worldPos;
 
 	void main(void) {
-		vec3 lightDir = normalize(lightPos[0].xyz - (worldPos * lightPos[0].w));
-		float cos = dot(normalize(worldNormal), lightDir);
-
-		vec3 M = lightPowerDensity[0] / dot(lightDir,lightDir);
-		gl_FragColor = vec4(max(cos, 0.0) * color * M, 1);
+		vec4 apparentColor = vec4(0,0,0,0);
+		for (int i = 0; i < 2; i++) {
+			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
+			float cos = dot(normalize(worldNormal), normalize(lightDir));
+			vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
+			apparentColor = apparentColor + vec4(max(cos, 0.0) * color.xyz * M, 1);
+		}
+		gl_FragColor = apparentColor;
 	}
 `;
