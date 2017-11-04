@@ -38,7 +38,7 @@ GameObject.prototype.draw = function(camera){
 
 GameObject.prototype.drawShadow = function(camera){ 
   if (this.shadowMaterial) {
-    Material.modelViewProjMatrix.set(this.modelMatrix).scale(new Vec3(1,0,1)).translate(new Vec3(0,.1,0)).mul(camera.viewProjMatrix);
+    Material.modelViewProjMatrix.set(this.modelMatrix).scale(new Vec3(1,0,1)).translate(new Vec3(0,.3,0)).mul(camera.viewProjMatrix);
     this.mesh.drawShadow(this.shadowMaterial); 
   }
 };
