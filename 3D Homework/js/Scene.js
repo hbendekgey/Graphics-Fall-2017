@@ -57,11 +57,10 @@ let Scene = function(gl) {
   gl.enable(gl.DEPTH_TEST);
 
   Material.lightPos.at(0).set(new Vec4(0,1,0,0)); // 0 if directional and 1 if point for vec4
+  Material.spotMainDir.at(0).set(new Vec3(0,1,0)); // same as lightPos for non-spotlights
   Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
-  Material.lightPos.at(1).set(new Vec4(0,0,0,1)); // 0 if directional and 1 if point for vec4
-  Material.lightPowerDensity.at(1).set(new Vec3(5000,5000,5000));
-
-
+  Material.lightPowerDensity.at(1).set(new Vec3(5000,5000,5000)); 
+  //remaining initialization for spotlight is in perspective camera
 
   this.timeAtLastFrame = new Date().getTime();
 };

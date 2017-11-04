@@ -9,6 +9,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	varying vec3 worldNormal;
 	uniform vec4 lightPos[2];
 	uniform vec3 lightPowerDensity[2];
+	uniform vec3 spotMainDir[2];
 
 	// We're not using this right now
 	varying vec3 worldPos;
@@ -20,12 +21,10 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
 			float cos = dot(normalize(worldNormal), normalize(lightDir));
 			vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
-			apparentColor = apparentColor + vec4(max(cos, 0.0) * color.xyz * M, 1);
+			float spotLight = pow(dot(normalize(lightDir),normalize(spotMainDir[i])),5.0);
+			apparentColor = apparentColor + vec4(max(cos, 0.0) * color.xyz * M, 1) * spotLight;
 		}
 		gl_FragColor = apparentColor;
 
-		// spotMainDir, set as same direction as lightDir, so it does nothing. 
-		// Unless you want the spotlight thing to work, their you do
-		// pow (dot(lightDir,spotMainDir), 5)
 	}
 `;

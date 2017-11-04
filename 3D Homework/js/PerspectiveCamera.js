@@ -110,11 +110,13 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed, avatar) {
       avatar.position.mul(1,0,1).add(0,5,0);
     }
   } 
+  this.spotLightPos = new Vec3(avatar.position).addScaled(15, this.ahead).add(new Vec3(0,10,0))
+  Material.lightPos.at(1).set(new Vec4(this.spotLightPos, 1));
+  Material.spotMainDir.at(1).set(this.ahead);
   this.position.set(avatar.position).addScaled(-30, this.ahead).addScaled(5, this.right);
   avatar.pitch = this.pitch;
   avatar.right = this.right;
   avatar.yaw = this.yaw + Math.PI;
-
 
   this.updateViewMatrix(); 
 }; 
