@@ -32,14 +32,14 @@ GameObject.prototype.draw = function(camera){
   Material.modelMatrixInverse.set(new Mat4(this.modelMatrix).invert());
   Material.modelViewProjMatrix.set(this.modelMatrix).mul(camera.viewProjMatrix);
   this.mesh.draw(); 
+  this.drawShadow(camera);
 };
 
 
 GameObject.prototype.drawShadow = function(camera){ 
-  this.updateModelMatrix();
-  this.shadowMaterial.modelMatrix.set(this.modelMatrix);
-  this.shadowMaterial.modelMatrixInverse.set(new Mat4(this.modelMatrix).invert());
-  this.shadowMaterial.modelViewProjMatrix.set(this.modelMatrix).scale(new Vec3(1,0,1)).translate(new Vec3(0,.01,0)).mul(camera.viewProjMatrix);
-  this.mesh.drawShadow(); 
+  if (this.shadowMaterial) {
+    Material.modelViewProjMatrix.set(this.modelMatrix).scale(new Vec3(1,0,1)).translate(new Vec3(0,.1,0)).mul(camera.viewProjMatrix);
+    this.mesh.drawShadow(this.shadowMaterial); 
+  }
 };
 

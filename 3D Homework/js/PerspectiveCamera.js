@@ -24,6 +24,8 @@ var PerspectiveCamera = function()
   this.viewProjMatrix = new Mat4();  
   this.updateViewMatrix();
   this.updateProjMatrix(); 
+
+  Material.lightPowerDensity.at(1).set(new Vec3(5000,5000,5000)); 
 }; 
 
 PerspectiveCamera.worldUp = new Vec3(0, 1, 0); 

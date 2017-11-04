@@ -34,8 +34,8 @@ MultiMesh.prototype.draw = function(gl){
   } 
 };
 
-MultiMesh.prototype.drawShadow = function(){ 
+MultiMesh.prototype.drawShadow = function(shadowMaterial){ 
   for (let i = 0; i < this.meshes.length; i++) { 
-    this.meshes[i].drawShadow(); 
+    this.meshes[i].drawShadow(shadowMaterial); 
   } 
 };
