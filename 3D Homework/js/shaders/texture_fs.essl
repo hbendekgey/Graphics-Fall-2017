@@ -21,8 +21,8 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
 			float cos = dot(normalize(worldNormal), normalize(lightDir));
 			vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
-			float spotLight = pow(dot(normalize(lightDir),normalize(spotMainDir[i])),5.0);
-			apparentColor = apparentColor + max(cos, 0.0) * baseColor.xyz * M * spotLight;
+			float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
+			apparentColor = apparentColor + max(cos, 0.0) * baseColor.xyz * M * pow(spotLight,5.0);
 		}
 		gl_FragColor = vec4(apparentColor, 1);
 

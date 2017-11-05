@@ -65,12 +65,6 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed, avatar) {
     if(this.pitch < -3.14/2.0) { 
       this.pitch = -3.14/2.0; 
     } 
-  }
-  if (avatar.position.y < 12 && this.pitch < -0.5) {
-    this.pitch +=0.02;
-    this.pitchChanged = true;
-  }
-  if(this.isDragging || this.pitchChanged) {
     this.mouseDelta = new Vec2(0.0, 0.0); 
     this.ahead = new Vec3(
      -Math.sin(this.yaw)*Math.cos(this.pitch),
@@ -81,45 +75,8 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed, avatar) {
       PerspectiveCamera.worldUp ); 
     this.right.normalize(); 
     this.up.setVectorProduct(this.right, this.ahead); 
-    this.pitchChanged = false;
-  } 
-
-  if(keysPressed.W) { 
-    avatar.position.addScaled(this.speed * dt, this.ahead); 
-    if (avatar.position.y < 5) {
-      avatar.position.mul(1,0,1).add(0,5,0);
-    }
-  } 
-  if(keysPressed.S) { 
-    avatar.position.addScaled(-this.speed * dt, this.ahead); 
-    if (avatar.position.y < 5) {
-      avatar.position.mul(1,0,1).add(0,5,0);
-    }
-
-  } 
-  if(keysPressed.D) { 
-    avatar.position.addScaled(this.speed * dt, this.right); 
-  } 
-  if(keysPressed.A) { 
-    avatar.position.addScaled(-this.speed * dt, this.right); 
-  } 
-  if(keysPressed.E) { 
-    avatar.position.addScaled(this.speed * dt, PerspectiveCamera.worldUp); 
-  } 
-  if(keysPressed.Q) { 
-    avatar.position.addScaled(-this.speed * dt, PerspectiveCamera.worldUp); 
-    if (avatar.position.y < 5) {
-      avatar.position.mul(1,0,1).add(0,5,0);
-    }
-  } 
-  this.spotLightPos = new Vec3(avatar.position).addScaled(15, this.ahead).add(new Vec3(0,10,0))
-  Material.lightPos.at(1).set(new Vec4(this.spotLightPos, 1));
-  Material.spotMainDir.at(1).set(this.ahead);
-  this.position.set(avatar.position).addScaled(-30, this.ahead).addScaled(5, this.right);
-  avatar.pitch = this.pitch;
-  avatar.right = this.right;
-  avatar.yaw = this.yaw + Math.PI;
-
+  }
+  this.position.set(avatar.position).addScaled(-30, this.ahead);
   this.updateViewMatrix(); 
 }; 
 

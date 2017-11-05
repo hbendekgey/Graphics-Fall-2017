@@ -20,6 +20,8 @@ let Scene = function(gl) {
   this.avatar = new GameObject(this.heliMultiMesh, new Material(gl, this.solidProgram));
   this.avatar.scale.mul(0.5);
   this.avatar.position.set(new Vec3(0,10,0));
+  this.avatar.orientation = Math.PI;
+  this.avatar.speed = 50;
 
   // create and initialize rotor
   this.rotorMaterials = [];
@@ -40,10 +42,6 @@ let Scene = function(gl) {
 
   // create and initialize camera
   this.camera = new PerspectiveCamera();
-  this.camera.pitch = -0.1;
-  this.camera.isDragging = true;
-  this.camera.move(1, [], this.avatar);
-  this.camera.isDragging = false;
 
   // create and initialize trees
   this.gameObjects = [];
@@ -63,9 +61,9 @@ let Scene = function(gl) {
 
   // initialize sunshine
   Material.lightPos.at(0).set(new Vec4(0,1,0,0));
-  Material.spotMainDir.at(0).set(new Vec3(0,1,0));
+  Material.spotMainDir.at(0).set(new Vec3(0,-1,0));
   Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
-  // Note: initialization of spotlight is in perspective camera
+  // Note: initialization of spotlight is below in moveAvatar
 
   this.timeAtLastFrame = new Date().getTime();
 };
@@ -87,6 +85,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   this.avatar.rotor.yaw += 0.1;
 
   // move the camera (and the avatar + spotlight)
+  this.moveAvatar(dt, keysPressed);
   this.camera.move(dt, keysPressed, this.avatar);
 
   // draw everything
@@ -97,3 +96,55 @@ Scene.prototype.update = function(gl, keysPressed) {
     this.gameObjects[i].draw(this.camera);
   }
 };
+
+Scene.prototype.moveAvatar = function(dt, keysPressed) {
+  this.avatar.velocity.set();
+  this.isRotated = false;
+  if(keysPressed.LEFT) {
+    this.avatar.yaw += dt; 
+    this.isRotated = true;
+  }
+  if(keysPressed.UP) {
+    this.avatar.pitch -= dt; 
+    this.isRotated = true;
+  }
+  if(keysPressed.RIGHT) {
+    this.avatar.yaw -= dt; 
+    this.isRotated = true;
+  }
+  if(keysPressed.DOWN) {
+    this.avatar.pitch += dt; 
+    this.isRotated = true;
+  }
+  if(this.avatar.pitch > 3.14/2.0) { 
+      this.avatar.pitch = 3.14/2.0; 
+    } 
+    if(this.avatar.pitch < -3.14/2.0) { 
+      this.avatar.pitch = -3.14/2.0; 
+  }
+  if (this.isRotated) {
+    this.avatar.updateOrientation();
+  }
+  if(keysPressed.W) { 
+    this.avatar.velocity.add(this.avatar.ahead); 
+  } 
+  if(keysPressed.S) {
+    this.avatar.velocity.sub(this.avatar.ahead); 
+  } 
+  if(keysPressed.D) { 
+    this.avatar.velocity.add(this.avatar.right); 
+  } 
+  if(keysPressed.A) { 
+    this.avatar.velocity.sub(this.avatar.right); 
+  } 
+  if(keysPressed.E) { 
+    this.avatar.velocity.add(PerspectiveCamera.worldUp); 
+  } 
+  if(keysPressed.Q) { 
+    this.avatar.velocity.sub(PerspectiveCamera.worldUp); 
+  }
+  this.avatar.move(dt);
+  this.spotLightPos = new Vec3(this.avatar.position).addScaled(15, this.avatar.ahead).add(new Vec3(0,10,0));
+  Material.lightPos.at(1).set(new Vec4(this.spotLightPos, 1));
+  Material.spotMainDir.at(1).set(this.avatar.ahead);
+}
