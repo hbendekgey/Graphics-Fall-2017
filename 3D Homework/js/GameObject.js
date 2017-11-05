@@ -55,8 +55,8 @@ GameObject.prototype.updateOrientation = function() {
      -Math.cos(this.yaw)*Math.cos(this.pitch) ); 
   this.right.setVectorProduct(this.ahead, PerspectiveCamera.worldUp); 
   this.right.normalize();
-}
+};
 
 GameObject.prototype.move = function(dt) {
   this.position.addScaled(dt * this.speed, this.velocity);
-}
+};

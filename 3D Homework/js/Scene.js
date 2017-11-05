@@ -154,4 +154,4 @@ Scene.prototype.moveAvatar = function(dt, keysPressed) {
   this.spotLightPos = new Vec3(this.avatar.position).addScaled(15, this.avatar.ahead).add(new Vec3(0,10,0));
   Material.lightPos.at(1).set(new Vec4(this.spotLightPos, 1));
   Material.spotMainDir.at(1).set(this.avatar.ahead);
-}
+};
