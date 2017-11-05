@@ -1,0 +1,28 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
+	precision highp float;
+
+	// for applying the texture coloring
+	varying vec2 texCoord; 
+	uniform sampler2D colorTexture; 
+
+	// for shading according to light source
+	varying vec3 worldNormal;
+	uniform vec4 lightPos[2];
+	uniform vec3 lightPowerDensity[2];
+	uniform vec3 spotMainDir[2];
+	varying vec3 worldPos;
+
+	void main(void) {
+		vec4 baseColor = texture2D(colorTexture, texCoord);
+		vec3 apparentColor = vec3(0,0,0);
+		for (int i = 0; i < 2; i++) {
+			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
+			float cos = dot(normalize(worldNormal), normalize(lightDir));
+			vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
+			float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
+			apparentColor = apparentColor + max(cos, 0.0) * baseColor.xyz * M * pow(spotLight,5.0);
+		}
+		gl_FragColor = vec4(apparentColor, 1);
+
+	}
+`;
