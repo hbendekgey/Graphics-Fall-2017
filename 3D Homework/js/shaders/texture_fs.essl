@@ -23,6 +23,5 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 			apparentColor = apparentColor + max(cos, 0.0) * baseColor.xyz * M * pow(spotLight,5.0);
 		}
 		gl_FragColor = vec4(apparentColor, 1);
-
 	}
 `;

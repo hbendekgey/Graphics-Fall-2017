@@ -31,11 +31,10 @@ let Scene = function(gl) {
   this.avatar.speed = 50;
 
   // create and initialize rotor
-  this.rotorMaterials = [];
-  for (var i = 0; i < 2; i++) {
-    this.rotorMaterials.push(new Material(gl, this.solidProgram));
-    this.rotorMaterials[i].color.set(new Vec3(0.7,0.7,0.7));
-  }
+  this.rotorMaterials = [new Material(gl, this.solidProgram), new Material(gl, this.solidProgram)];
+  this.rotorMaterials[0].color.set(new Vec3(0.7,0.7,0.7));
+  this.rotorMaterials[1].color.set(new Vec3(0.7,0.7,0.7));
+
   this.rotorMultiMesh = new MultiMesh(gl, "media/heli/mainrotor.json", this.rotorMaterials);
   this.avatar.rotor = new GameObject(this.rotorMultiMesh, new Material(gl, this.shadowProgram));
   this.avatar.rotor.position.set(new Vec3(0,14,0));
@@ -46,9 +45,6 @@ let Scene = function(gl) {
   this.groundMaterial.colorTexture.set(new Texture2D(gl, "media/sand.png"));
   this.textureGeometry = new TexturedQuadGeometry(gl);
   this.ground = new GameObject(new Mesh(this.textureGeometry, this.groundMaterial));
-
-  // create and initialize camera
-  this.camera = new PerspectiveCamera();
 
   // create and initialize trees
   this.gameObjects = [];
@@ -64,6 +60,18 @@ let Scene = function(gl) {
     this.gameObjects[i].position.addScaled(Math.random() - 0.5, new Vec3(0,0,1000));
   }
 
+  // for building slowpokes
+  this.slowpokeBodyTexture = new Texture2D(gl, "media/slowpoke/body.png");
+  this.slowpokeEyeTexture = new Texture2D(gl, "media/slowpoke/eye.png");
+  this.slowpokeMaterials = [new Material(gl, this.textureProgram), new Material(gl, this.textureProgram)];
+  this.slowpokeMaterials[0].colorTexture.set(this.slowpokeBodyTexture);
+  this.slowpokeMaterials[1].colorTexture.set(this.slowpokeEyeTexture);
+  this.slowpokeMultiMesh = new MultiMesh(gl, "media/slowpoke/Slowpoke.json", this.slowpokeMaterials);
+  this.gameObjects.push(new GameObject(this.slowpokeMultiMesh, new Material(gl, this.shadowProgram)));
+  this.gameObjects[30].orientation = Math.PI;
+
+  // create and initialize camera
+  this.camera = new PerspectiveCamera();
   gl.enable(gl.DEPTH_TEST);
 
   // initialize sunshine
@@ -95,6 +103,9 @@ Scene.prototype.update = function(gl, keysPressed) {
   this.moveAvatar(dt, keysPressed);
   this.camera.move(dt, keysPressed, this.avatar);
 
+  // moves the slowpokes
+  this.moveOnCurve(this.gameObjects[30], 0);
+
   // draw everything
   this.ground.draw(this.camera);
   this.avatar.draw(this.camera);
@@ -102,6 +113,7 @@ Scene.prototype.update = function(gl, keysPressed) {
   for (var i = 0; i < this.gameObjects.length; i++) {
     this.gameObjects[i].draw(this.camera);
   }
+
 };
 
 Scene.prototype.moveAvatar = function(dt, keysPressed) {
@@ -154,4 +166,18 @@ Scene.prototype.moveAvatar = function(dt, keysPressed) {
   this.spotLightPos = new Vec3(this.avatar.position).addScaled(15, this.avatar.ahead).add(new Vec3(0,10,0));
   Material.lightPos.at(1).set(new Vec4(this.spotLightPos, 1));
   Material.spotMainDir.at(1).set(this.avatar.ahead);
+};
+
+Scene.prototype.moveOnCurve = function(gameObject, initialTime) {
+  let xPos = 10 * Math.cos(this.timeAtLastFrame / 1000 + initialTime);
+  let yPos = 10 * Math.sin(3 * this.timeAtLastFrame / 1000 + initialTime) + 10;
+  let zPos = 10 * Math.sin(this.timeAtLastFrame / 1000 + initialTime);
+  gameObject.position = new Vec3(xPos, yPos, zPos);
+  let xVel = -1 * Math.sin(this.timeAtLastFrame / 1000 + initialTime);
+  let yVel = 3 * Math.cos(3 * this.timeAtLastFrame / 1000 + initialTime);
+  let zVel = 1 * Math.cos(this.timeAtLastFrame / 1000 + initialTime);
+  let velocity = new Vec3(xVel, yVel, zVel).normalize();
+  gameObject.pitch = Math.asin(velocity.y);
+  gameObject.yaw = Math.atan(-1 * velocity.x / Math.cos(gameObject.pitch));
+  gameObject.updateOrientation();
 };
