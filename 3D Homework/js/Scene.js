@@ -10,6 +10,9 @@ let Scene = function(gl) {
   this.fsSolid = new Shader(gl, gl.FRAGMENT_SHADER, "solid_fs.essl");
   this.solidProgram = new TexturedProgram(gl, this.vsSolid, this.fsSolid);
 
+  // for shadow
+  this.fsShadow = new Shader(gl, gl.FRAGMENT_SHADER, "shadow_fs.essl"); 
+  this.shadowProgram = new TexturedProgram(gl, this.vsSolid, this.fsShadow);
 
   // create and initialize avatar
   this.heliTexture = new Texture2D(gl, "media/heli/heli.png");
@@ -17,7 +20,7 @@ let Scene = function(gl) {
   this.heliMaterials.push(new Material(gl, this.textureProgram));
   this.heliMaterials[0].colorTexture.set(this.heliTexture);
   this.heliMultiMesh = new MultiMesh(gl, "media/heli/heli1.json", this.heliMaterials);
-  this.avatar = new GameObject(this.heliMultiMesh, new Material(gl, this.solidProgram));
+  this.avatar = new GameObject(this.heliMultiMesh, new Material(gl, this.shadowProgram));
   this.avatar.scale.mul(0.5);
   this.avatar.position.set(new Vec3(0,10,0));
   this.avatar.orientation = Math.PI;
@@ -30,7 +33,7 @@ let Scene = function(gl) {
     this.rotorMaterials[i].color.set(new Vec3(0.7,0.7,0.7));
   }
   this.rotorMultiMesh = new MultiMesh(gl, "media/heli/mainrotor.json", this.rotorMaterials);
-  this.avatar.rotor = new GameObject(this.rotorMultiMesh, new Material(gl, this.solidProgram));
+  this.avatar.rotor = new GameObject(this.rotorMultiMesh, new Material(gl, this.shadowProgram));
   this.avatar.rotor.position.set(new Vec3(0,14,0));
   this.avatar.rotor.parent = this.avatar;
 
@@ -52,7 +55,7 @@ let Scene = function(gl) {
   this.treeMultiMesh = new MultiMesh(gl, "media/tree/tree.json", this.treeMaterials);
 
   for (var i = 0; i < 30; i++) {
-    this.gameObjects.push(new GameObject(this.treeMultiMesh, new Material(gl, this.solidProgram)));
+    this.gameObjects.push(new GameObject(this.treeMultiMesh, new Material(gl, this.shadowProgram)));
     this.gameObjects[i].position.addScaled(Math.random() - 0.5, new Vec3(1000,0,0));
     this.gameObjects[i].position.addScaled(Math.random() - 0.5, new Vec3(0,0,1000));
   }

@@ -1,0 +1,25 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
+	precision highp float;
+
+	// for shading according to light source
+	varying vec3 worldNormal;
+	uniform vec4 lightPos[2];
+	uniform vec3 lightPowerDensity[2];
+	uniform vec3 spotMainDir[2];
+
+	// We're not using this right now
+	varying vec3 worldPos;
+
+	void main(void) {
+		float opacity = 1.0;
+		for (int i = 0; i < 2; i++) {
+			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
+			float brightness = (lightPowerDensity[i].r + lightPowerDensity[i].g + lightPowerDensity[i].b) / 3.0;
+			float M =  brightness / dot(lightDir,lightDir);
+			float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
+			opacity = opacity - M * spotLight * lightPos[i].w;
+		}
+		gl_FragColor = vec4(0, 0, 0, opacity);
+
+	}
+`;
