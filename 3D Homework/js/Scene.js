@@ -8,11 +8,14 @@ let Scene = function(gl) {
   // program for all solid-color objects: like rotor and shadows
   this.vsSolid = new Shader(gl, gl.VERTEX_SHADER, "solid_vs.essl");
   this.fsSolid = new Shader(gl, gl.FRAGMENT_SHADER, "solid_fs.essl");
-  this.solidProgram = new TexturedProgram(gl, this.vsSolid, this.fsSolid);
+  this.solidProgram = new Program(gl, this.vsSolid, this.fsSolid);
 
   // for shadow
   this.fsShadow = new Shader(gl, gl.FRAGMENT_SHADER, "shadow_fs.essl"); 
-  this.shadowProgram = new TexturedProgram(gl, this.vsSolid, this.fsShadow);
+  this.shadowProgram = new Program(gl, this.vsSolid, this.fsShadow);
+  //this.shadowMaterial = new Material(gl, this.shadowProgram);
+  // NOTE: If you want to get rid of shadow problem, delete shadow shader and
+  // replace fsShadow in shadowProgram with fsSolid
 
   // for shiny
   this.fsShiny = new Shader(gl, gl.FRAGMENT_SHADER, "shiny_texture_fs.essl"); 
@@ -96,9 +99,9 @@ Scene.prototype.update = function(gl, keysPressed) {
   this.camera.move(dt, keysPressed, this.avatar);
 
   // draw everything
+  this.ground.draw(this.camera);
   this.avatar.draw(this.camera);
   this.avatar.rotor.draw(this.camera);
-  this.ground.draw(this.camera);
   for (var i = 0; i < this.gameObjects.length; i++) {
     this.gameObjects[i].draw(this.camera);
   }
