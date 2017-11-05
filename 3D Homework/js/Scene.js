@@ -13,9 +13,6 @@ let Scene = function(gl) {
   // for shadow
   this.fsShadow = new Shader(gl, gl.FRAGMENT_SHADER, "shadow_fs.essl"); 
   this.shadowProgram = new Program(gl, this.vsSolid, this.fsShadow);
-  //this.shadowMaterial = new Material(gl, this.shadowProgram);
-  // NOTE: If you want to get rid of shadow problem, delete shadow shader and
-  // replace fsShadow in shadowProgram with fsSolid
 
   // for shiny
   this.fsShiny = new Shader(gl, gl.FRAGMENT_SHADER, "shiny_texture_fs.essl"); 
