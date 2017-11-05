@@ -34,6 +34,7 @@ GameObject.prototype.draw = function(camera){
   Material.modelMatrix.set(this.modelMatrix);
   Material.modelMatrixInverse.set(new Mat4(this.modelMatrix).invert());
   Material.modelViewProjMatrix.set(this.modelMatrix).mul(camera.viewProjMatrix);
+  Material.cameraPos.set(camera.position);
   this.mesh.draw(); 
   this.drawShadow(camera);
 };

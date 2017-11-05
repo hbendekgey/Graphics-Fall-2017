@@ -53,4 +53,5 @@ Object.defineProperty(Material, "modelViewProjMatrix", {value: new Mat4()} );
 Object.defineProperty(Material, "lightPos", {value: new Vec4Array(2)} );
 Object.defineProperty(Material, "spotMainDir", {value: new Vec3Array(2)} );
 Object.defineProperty(Material, "lightPowerDensity", {value: new Vec3Array(2)} );
+Object.defineProperty(Material, "cameraPos", {value: new Vec3()} );
 

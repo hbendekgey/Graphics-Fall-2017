@@ -14,10 +14,14 @@ let Scene = function(gl) {
   this.fsShadow = new Shader(gl, gl.FRAGMENT_SHADER, "shadow_fs.essl"); 
   this.shadowProgram = new TexturedProgram(gl, this.vsSolid, this.fsShadow);
 
+  // for shiny
+  this.fsShiny = new Shader(gl, gl.FRAGMENT_SHADER, "shiny_texture_fs.essl"); 
+  this.shinyProgram = new TexturedProgram(gl, this.vsTexture, this.fsShiny);
+
   // create and initialize avatar
   this.heliTexture = new Texture2D(gl, "media/heli/heli.png");
   this.heliMaterials = [];
-  this.heliMaterials.push(new Material(gl, this.textureProgram));
+  this.heliMaterials.push(new Material(gl, this.shinyProgram));
   this.heliMaterials[0].colorTexture.set(this.heliTexture);
   this.heliMultiMesh = new MultiMesh(gl, "media/heli/heli1.json", this.heliMaterials);
   this.avatar = new GameObject(this.heliMultiMesh, new Material(gl, this.shadowProgram));
