@@ -69,6 +69,7 @@ let Scene = function(gl) {
   this.slowpokeMultiMesh = new MultiMesh(gl, "media/slowpoke/Slowpoke.json", this.slowpokeMaterials);
   this.gameObjects.push(new GameObject(this.slowpokeMultiMesh, new Material(gl, this.shadowProgram)));
   this.gameObjects[30].orientation = Math.PI;
+  this.gameObjects[30].scale = new Vec3(5,5,5);
 
   // create and initialize camera
   this.camera = new PerspectiveCamera();
@@ -169,15 +170,18 @@ Scene.prototype.moveAvatar = function(dt, keysPressed) {
 };
 
 Scene.prototype.moveOnCurve = function(gameObject, initialTime) {
-  let xPos = 10 * Math.cos(this.timeAtLastFrame / 1000 + initialTime);
-  let yPos = 10 * Math.sin(3 * this.timeAtLastFrame / 1000 + initialTime) + 10;
-  let zPos = 10 * Math.sin(this.timeAtLastFrame / 1000 + initialTime);
+  let t = (this.timeAtLastFrame / 1000 + initialTime) % (2 * Math.PI);
+  let xPos = 100 * Math.cos(t);
+  let yPos = 100 * Math.sin(3 * t) + 10;
+  let zPos = 100 * Math.sin(t);
   gameObject.position = new Vec3(xPos, yPos, zPos);
-  let xVel = -1 * Math.sin(this.timeAtLastFrame / 1000 + initialTime);
-  let yVel = 3 * Math.cos(3 * this.timeAtLastFrame / 1000 + initialTime);
-  let zVel = 1 * Math.cos(this.timeAtLastFrame / 1000 + initialTime);
+
+  let xVel = -1 * Math.sin(t);
+  let yVel = 3 * Math.cos(3 * t);
+  let zVel = 1 * Math.cos(t);
   let velocity = new Vec3(xVel, yVel, zVel).normalize();
+
   gameObject.pitch = Math.asin(velocity.y);
-  gameObject.yaw = Math.atan(-1 * velocity.x / Math.cos(gameObject.pitch));
+  gameObject.yaw = -1 * t + Math.PI;
   gameObject.updateOrientation();
 };

@@ -16,7 +16,7 @@ let GameObject = function(mesh, shadowMaterial) {
 };
 
 GameObject.prototype.updateModelMatrix = function() { 
-  this.modelMatrix.set().rotate(this.yaw + this.orientation,0,1,0)
+  this.modelMatrix.set().rotate(this.yaw + this.orientation, PerspectiveCamera.worldUp)
                         .rotate(this.pitch,this.right)
                         .scale(this.scale)
                         .translate(this.position);
