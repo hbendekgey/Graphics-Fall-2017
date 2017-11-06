@@ -67,9 +67,12 @@ let Scene = function(gl) {
   this.slowpokeMaterials[0].colorTexture.set(this.slowpokeBodyTexture);
   this.slowpokeMaterials[1].colorTexture.set(this.slowpokeEyeTexture);
   this.slowpokeMultiMesh = new MultiMesh(gl, "media/slowpoke/Slowpoke.json", this.slowpokeMaterials);
-  this.gameObjects.push(new GameObject(this.slowpokeMultiMesh, new Material(gl, this.shadowProgram)));
-  this.gameObjects[30].orientation = Math.PI;
-  this.gameObjects[30].scale = new Vec3(5,5,5);
+
+  for (var i = 30; i < 33; i++) {
+    this.gameObjects.push(new GameObject(this.slowpokeMultiMesh, new Material(gl, this.shadowProgram)));
+    this.gameObjects[i].orientation = Math.PI;
+    this.gameObjects[i].scale = new Vec3(5,5,5);
+  }
 
   // create and initialize camera
   this.camera = new PerspectiveCamera();
@@ -106,6 +109,9 @@ Scene.prototype.update = function(gl, keysPressed) {
 
   // moves the slowpokes
   this.moveOnCurve(this.gameObjects[30], 0);
+  this.moveOnCurve(this.gameObjects[31], 2 * Math.PI / 3.0);
+  this.moveOnCurve(this.gameObjects[32], 4 * Math.PI / 3.0);
+
 
   // draw everything
   this.ground.draw(this.camera);
