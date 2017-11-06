@@ -33,9 +33,18 @@ App.prototype.resize = function() {
 App.prototype.registerEventHandlers = function() {
 	let theApp = this;
 	document.onkeydown = function(event) {
+		if (keyboardMap[event.keyCode] == 'T' && !theApp.keysPressed.T) {
+			theApp.scene.trackingTime = 0;
+			theApp.scene.isTracking = true;
+		}
 		theApp.keysPressed[keyboardMap[event.keyCode]] = true;
 	};
 	document.onkeyup = function(event) {
+		if (keyboardMap[event.keyCode] == 'T') {
+			theApp.scene.isTracking = false;
+			theApp.scene.camera.trackingUp = 0;
+			theApp.scene.camera.trackingRight = 0;
+		}
 		theApp.keysPressed[keyboardMap[event.keyCode]] = false;
 	};
 	this.canvas.onmousedown = function(event) {

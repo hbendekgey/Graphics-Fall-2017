@@ -76,6 +76,8 @@ let Scene = function(gl) {
 
   // create and initialize camera
   this.camera = new PerspectiveCamera();
+  this.trackingTime = 0;
+
   gl.enable(gl.DEPTH_TEST);
 
   // initialize sunshine
@@ -103,15 +105,19 @@ Scene.prototype.update = function(gl, keysPressed) {
   // rotate the rotor
   this.avatar.rotor.yaw += 0.1;
 
-  // move the camera (and the avatar + spotlight)
+  // move the avatar
   this.moveAvatar(dt, keysPressed);
+
+  // move the camera
+  if (this.isTracking) {
+    this.trackCamera(dt);
+  } 
   this.camera.move(dt, keysPressed, this.avatar);
 
   // moves the slowpokes
   this.moveOnCurve(this.gameObjects[30], 0);
   this.moveOnCurve(this.gameObjects[31], 2 * Math.PI / 3.0);
   this.moveOnCurve(this.gameObjects[32], 4 * Math.PI / 3.0);
-
 
   // draw everything
   this.ground.draw(this.camera);
@@ -190,4 +196,13 @@ Scene.prototype.moveOnCurve = function(gameObject, initialTime) {
   gameObject.pitch = Math.asin(velocity.y);
   gameObject.yaw = -1 * t + Math.PI;
   gameObject.updateOrientation();
+};
+
+Scene.prototype.trackCamera = function(dt) {
+  this.trackingTime = this.trackingTime + dt;
+  this.camera.trackingRight = 16 * Math.pow(Math.sin(this.trackingTime), 3);
+  this.camera.trackingUp = 13 * Math.cos(this.trackingTime) - 
+                           5 * Math.cos(2 * this.trackingTime) - 
+                           2 * Math.cos(3 * this.trackingTime) - 
+                           Math.cos(4 * this.trackingTime) - 5;
 };

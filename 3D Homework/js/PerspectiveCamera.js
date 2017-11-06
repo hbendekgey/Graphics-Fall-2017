@@ -17,7 +17,9 @@ var PerspectiveCamera = function()
   
   this.isDragging = false; 
   this.mouseDelta = new Vec2(0.0, 0.0); 
-  
+  this.trackingUp = 0;
+  this.trackingRight = 0;
+
   // Matrices for perspective
   this.viewMatrix = new Mat4(); 
   this.projMatrix = new Mat4();
@@ -76,7 +78,9 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed, avatar) {
     this.right.normalize(); 
     this.up.setVectorProduct(this.right, this.ahead); 
   }
-  this.position.set(avatar.position).addScaled(-30, this.ahead);
+  this.position.set(avatar.position).addScaled(-30, this.ahead)
+                                    .addScaled(this.trackingUp, this.up)
+                                    .addScaled(this.trackingRight, this.right);
   this.updateViewMatrix(); 
 }; 
 
