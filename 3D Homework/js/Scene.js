@@ -10,6 +10,10 @@ let Scene = function(gl) {
   this.fsSolid = new Shader(gl, gl.FRAGMENT_SHADER, "solid_fs.essl");
   this.solidProgram = new Program(gl, this.vsSolid, this.fsSolid);
 
+  // for wooden balloons
+  this.fsWood = new Shader(gl, gl.FRAGMENT_SHADER, "wood_fs.essl");
+  this.woodProgram = new Program(gl, this.vsSolid, this.fsWood);
+
   // for shadow
   this.fsShadow = new Shader(gl, gl.FRAGMENT_SHADER, "shadow_fs.essl"); 
   this.shadowProgram = new Program(gl, this.vsSolid, this.fsShadow);
@@ -34,7 +38,6 @@ let Scene = function(gl) {
   this.rotorMaterials = [new Material(gl, this.solidProgram), new Material(gl, this.solidProgram)];
   this.rotorMaterials[0].color.set(new Vec3(0.7,0.7,0.7));
   this.rotorMaterials[1].color.set(new Vec3(0.7,0.7,0.7));
-
   this.rotorMultiMesh = new MultiMesh(gl, "media/heli/mainrotor.json", this.rotorMaterials);
   this.avatar.rotor = new GameObject(this.rotorMultiMesh, new Material(gl, this.shadowProgram));
   this.avatar.rotor.position.set(new Vec3(0,14,0));
@@ -46,8 +49,10 @@ let Scene = function(gl) {
   this.textureGeometry = new TexturedQuadGeometry(gl);
   this.ground = new GameObject(new Mesh(this.textureGeometry, this.groundMaterial));
 
-  // create and initialize trees
+  // array containing trees, wooden balloons and slowpokes
   this.gameObjects = [];
+
+  // create and initialize trees
   this.treeTexture = new Texture2D(gl, "media/tree/tree.png");
   this.treeMaterials = [];
   this.treeMaterials.push(new Material(gl, this.textureProgram));
@@ -60,7 +65,20 @@ let Scene = function(gl) {
     this.gameObjects[i].position.addScaled(Math.random() - 0.5, new Vec3(0,0,1000));
   }
 
-  // for building slowpokes
+  // create and initialize wooden balloons
+  this.balloonTexture = new Texture2D(gl, "media/balloon/balloon.png");
+  this.balloonMaterials = [];
+  this.balloonMaterials.push(new Material(gl, this.woodProgram));
+  this.balloonMultiMesh = new MultiMesh(gl, "media/balloon/balloon.json", this.balloonMaterials);
+  
+  for (var i = 30; i < 50; i++) {
+    this.gameObjects.push(new GameObject(this.balloonMultiMesh, new Material(gl, this.shadowProgram)));
+    this.gameObjects[i].position.addScaled(Math.random() - 0.5, new Vec3(1000,0,0));
+    this.gameObjects[i].position.addScaled(Math.random(), new Vec3(0,500,0));
+    this.gameObjects[i].position.addScaled(Math.random() - 0.5, new Vec3(0,0,1000));
+  }
+
+  // create and initialize slowpokes
   this.slowpokeBodyTexture = new Texture2D(gl, "media/slowpoke/body.png");
   this.slowpokeEyeTexture = new Texture2D(gl, "media/slowpoke/eye.png");
   this.slowpokeMaterials = [new Material(gl, this.textureProgram), new Material(gl, this.textureProgram)];
@@ -68,7 +86,7 @@ let Scene = function(gl) {
   this.slowpokeMaterials[1].colorTexture.set(this.slowpokeEyeTexture);
   this.slowpokeMultiMesh = new MultiMesh(gl, "media/slowpoke/Slowpoke.json", this.slowpokeMaterials);
 
-  for (var i = 30; i < 33; i++) {
+  for (var i = 50; i < 53; i++) {
     this.gameObjects.push(new GameObject(this.slowpokeMultiMesh, new Material(gl, this.shadowProgram)));
     this.gameObjects[i].orientation = Math.PI;
     this.gameObjects[i].scale = new Vec3(5,5,5);
@@ -109,15 +127,15 @@ Scene.prototype.update = function(gl, keysPressed) {
   this.moveAvatar(dt, keysPressed);
 
   // move the camera
+  this.camera.move(dt, keysPressed, this.avatar);
   if (this.isTracking) {
     this.trackCamera(dt);
   } 
-  this.camera.move(dt, keysPressed, this.avatar);
 
   // moves the slowpokes
-  this.moveOnCurve(this.gameObjects[30], 0);
-  this.moveOnCurve(this.gameObjects[31], 2 * Math.PI / 3.0);
-  this.moveOnCurve(this.gameObjects[32], 4 * Math.PI / 3.0);
+  this.moveOnCurve(this.gameObjects[50], 0);
+  this.moveOnCurve(this.gameObjects[51], 2 * Math.PI / 3.0);
+  this.moveOnCurve(this.gameObjects[52], 4 * Math.PI / 3.0);
 
   // draw everything
   this.ground.draw(this.camera);

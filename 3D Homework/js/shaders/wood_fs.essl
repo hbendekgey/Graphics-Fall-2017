@@ -1,0 +1,46 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
+	precision highp float;
+
+	// for shading according to light source
+	varying vec3 worldNormal;
+	uniform vec4 lightPos[2];
+	uniform vec3 lightPowerDensity[2];
+	uniform vec3 spotMainDir[2];
+	varying vec3 worldPos;
+
+
+	float snoise(vec3 r) {
+  		vec3 s = vec3(7502.0, 22777.0, 4767.0);
+  		float w = 0.0;
+  		for(int i=0; i<16; i++) {
+    		w += sin( dot(s - vec3(32768, 32768, 32768), r * 40.0) / 65536.0);
+    		s = mod(s, 32768.0) * 2.0 + floor(s / 32768.0);
+  		}
+  		return w / 32.0 + 0.5;
+	}
+
+  vec3 woodColor() {
+    float scale = 1.0;
+    float turbulence = 500.0;
+    float period = 8.0;
+    float sharpness = 12.0;
+    float w = worldPos.x * period + pow(snoise(worldPos * scale), sharpness) * turbulence; 
+    w -= floor(w);
+    return vec3(1.0, 0.3, 0.0) * w + vec3(0.35, 0.1, 0.05) * (1.0 - w);
+
+  }
+
+	void main(void) {
+    vec3 baseColor = woodColor();
+    vec3 apparentColor = vec3(0,0,0);
+    for (int i = 0; i < 2; i++) {
+      vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
+      float cos = dot(normalize(worldNormal), normalize(lightDir));
+      vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
+      float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])), 0.0);
+      apparentColor = apparentColor + max(cos, 0.0) * baseColor * M * pow(spotLight, 5.0);
+    }
+    gl_FragColor = vec4(apparentColor, 1);
+
+  }
+`;
