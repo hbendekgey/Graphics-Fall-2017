@@ -8,6 +8,7 @@ let GameObject = function(mesh, shadowMaterial) {
   this.yaw = 0;
   this.pitch = 0;
   this.right = new Vec3(0,0,1);
+  this.up = new Vec3(PerspectiveCamera.worldUp)
   this.scale = new Vec3(1,1,1); 
   this.modelMatrix = new Mat4(); 
   this.speed = 0;
@@ -55,6 +56,7 @@ GameObject.prototype.updateOrientation = function() {
      -Math.cos(this.yaw)*Math.cos(this.pitch) ); 
   this.right.setVectorProduct(this.ahead, PerspectiveCamera.worldUp); 
   this.right.normalize();
+  this.up.setVectorProduct(this.right, this.ahead); 
 };
 
 GameObject.prototype.move = function(dt) {

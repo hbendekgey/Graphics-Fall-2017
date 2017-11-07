@@ -194,7 +194,7 @@ Scene.prototype.moveAvatar = function(dt, keysPressed) {
     this.avatar.velocity.sub(PerspectiveCamera.worldUp); 
   }
   this.avatar.move(dt);
-  this.spotLightPos = new Vec3(this.avatar.position).addScaled(11, this.avatar.ahead).add(new Vec3(0,7,0));
+  this.spotLightPos = new Vec3(this.avatar.position).addScaled(11, this.avatar.ahead).addScaled(7, this.avatar.up);
   Material.lightPos.at(1).set(new Vec4(this.spotLightPos, 1));
   Material.spotMainDir.at(1).set(this.avatar.ahead);
 };
