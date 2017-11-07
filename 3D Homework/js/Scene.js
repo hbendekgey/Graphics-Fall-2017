@@ -15,8 +15,9 @@ let Scene = function(gl) {
   this.woodProgram = new Program(gl, this.vsSolid, this.fsWood);
 
   // for shadow
+  this.vsShadow = new Shader(gl, gl.VERTEX_SHADER, "shadow_vs.essl"); 
   this.fsShadow = new Shader(gl, gl.FRAGMENT_SHADER, "shadow_fs.essl"); 
-  this.shadowProgram = new Program(gl, this.vsSolid, this.fsShadow);
+  this.shadowProgram = new Program(gl, this.vsShadow, this.fsShadow);
 
   // for shiny
   this.fsShiny = new Shader(gl, gl.FRAGMENT_SHADER, "shiny_texture_fs.essl"); 

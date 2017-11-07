@@ -49,6 +49,7 @@ Material.dummy = new Proxy(new Function(), {
 Object.defineProperty(Material, "lightDirection", {value: new Vec3()} );
 Object.defineProperty(Material, "modelMatrix", {value: new Mat4()} );
 Object.defineProperty(Material, "modelMatrixInverse", {value: new Mat4()} );
+Object.defineProperty(Material, "viewProjMatrix", {value: new Mat4()} );
 Object.defineProperty(Material, "modelViewProjMatrix", {value: new Mat4()} );
 Object.defineProperty(Material, "lightPos", {value: new Vec4Array(2)} );
 Object.defineProperty(Material, "spotMainDir", {value: new Vec3Array(2)} );
