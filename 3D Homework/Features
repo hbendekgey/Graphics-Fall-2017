@@ -1,0 +1,23 @@
+Controls:
+	WASD move the helicopter forward, left, backward and right.
+	QE move the helicopter up and down
+	Arrow keys turn the helicopter
+	Dragging the mouse turns the camera
+	T moves the camera in a heart curve
+
+List of features:
+	Avatar (the helicopter)
+	Sunshine (diagonal sunshine)
+	Highlander (helicopter, rotor, trees, slowpokes, balloons)
+	Shining (helicopter)
+	Spotlight (attached to helicopter, pointing forward)
+	The Matrix Revolutions (rotor)
+	Ground Zero (sand)
+	Keep Watching
+	Who Framed Roger Rabbit
+	Planes on a Snake (Slowpokes)
+	Tracking
+	Dead Solid Perfect (balloons)
+
+Need to do:
+	Pitch Black (I didn't like the fact that the spotlight didn't shine on the shadows, so I created a new fragment shader in which the brightness of all non-directional lights affects its opacity, so shining a light on a shadow makes it go away)

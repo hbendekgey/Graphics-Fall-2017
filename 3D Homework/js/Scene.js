@@ -99,8 +99,8 @@ let Scene = function(gl) {
   gl.enable(gl.DEPTH_TEST);
 
   // initialize sunshine
-  Material.lightPos.at(0).set(new Vec4(0,1,0,0));
-  Material.spotMainDir.at(0).set(new Vec3(0,-1,0));
+  Material.lightPos.at(0).set(new Vec4(0.5,1,-0.5,0).normalize());
+  Material.spotMainDir.at(0).set(new Vec3(Material.lightPos.at(0)).mul(-1));
   Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
   // Note: initialization of spotlight is below in moveAvatar
 
@@ -194,7 +194,7 @@ Scene.prototype.moveAvatar = function(dt, keysPressed) {
     this.avatar.velocity.sub(PerspectiveCamera.worldUp); 
   }
   this.avatar.move(dt);
-  this.spotLightPos = new Vec3(this.avatar.position).addScaled(15, this.avatar.ahead).add(new Vec3(0,10,0));
+  this.spotLightPos = new Vec3(this.avatar.position).addScaled(11, this.avatar.ahead).add(new Vec3(0,7,0));
   Material.lightPos.at(1).set(new Vec4(this.spotLightPos, 1));
   Material.spotMainDir.at(1).set(this.avatar.ahead);
 };
