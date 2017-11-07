@@ -13,11 +13,9 @@ List of features:
 	Spotlight (attached to helicopter, pointing forward)
 	The Matrix Revolutions (rotor)
 	Ground Zero (sand)
+	Pitch Black (I didn't like the fact that the spotlight didn't shine on the shadows, so I created a new fragment shader in which the brightness of all non-directional lights affects its opacity, so shining a light on a shadow makes it go away)
 	Keep Watching
 	Who Framed Roger Rabbit
 	Planes on a Snake (Slowpokes)
 	Tracking
 	Dead Solid Perfect (balloons)
-
-Need to do:
-	Pitch Black (I didn't like the fact that the spotlight didn't shine on the shadows, so I created a new fragment shader in which the brightness of all non-directional lights affects its opacity, so shining a light on a shadow makes it go away)
