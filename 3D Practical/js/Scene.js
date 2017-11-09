@@ -20,6 +20,15 @@ let Scene = function(gl) {
 
   this.gameObjects[0].position.set(new Vec3 (0,0,-30));
 
+  this.vsEnvironment = new Shader(gl, gl.VERTEX_SHADER, "environment_vs.essl");
+  this.fsEnvironment = new Shader(gl, gl.FRAGMENT_SHADER, "environment_fs.essl");
+  this.environmentProgram = new Program(gl, this.vsEnvironment, this.fsEnvironment);
+
+  this.environmentMaterial = new Material(gl, this.environmentProgram);
+  this.environmentMaterial.probeTexture.set(this.mirrorTexture);
+  this.gameObjects.push(new GameObject(new Mesh(new QuadGeometry(gl), this.environmentMaterial)));
+
+
   this.camera = new PerspectiveCamera();
 
   gl.enable(gl.DEPTH_TEST);

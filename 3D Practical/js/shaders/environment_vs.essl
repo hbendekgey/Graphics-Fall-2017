@@ -1,0 +1,9 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
+	attribute vec3 vertexPosition;
+	varying vec4 worldPos;
+
+	void main(void) {
+		gl_Position = vec4(vertexPosition, 1);
+		worldPos = vec4(vertexPosition, 1);
+	}
+`;

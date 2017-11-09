@@ -8,7 +8,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	uniform sampler2D probeTexture;
 
 	void main(void) {	
-		vec3 reflDir = reflect(viewDir, worldNormal);
+		vec3 reflDir = reflect(normalize(-1.0 * viewDir), normalize(worldNormal));
 		vec3 mirrorSphereCoord = normalize(vec3(0.0,0.0,1.0) + reflDir) / 2.0;
 		vec2 probeTex = vec2(mirrorSphereCoord.x, -1.0 * mirrorSphereCoord.y) + vec2(0.5, 0.5);
 		gl_FragColor = texture2D(probeTexture, probeTex);
