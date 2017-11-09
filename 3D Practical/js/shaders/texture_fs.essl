@@ -2,18 +2,16 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	precision highp float;
 
 	// for applying the texture coloring
-	varying vec2 texCoord; 
-	uniform sampler2D colorTexture; 
-
-	// for shading according to light source
 	varying vec3 worldNormal;
-	uniform vec3 lightDirection;
-
-	// We're not using this right now
 	varying vec3 worldPos;
+	varying vec3 viewDir;
+	uniform sampler2D probeTexture;
 
-	void main(void) {		
-		float cos = dot(normalize(worldNormal), normalize(lightDirection));
-		gl_FragColor = vec4(max(cos, 0.0) * texture2D(colorTexture, texCoord).xyz, 1);
+	void main(void) {	
+		vec3 reflDir = reflect(viewDir, worldNormal);
+		vec3 mirrorSphereCoord = normalize(vec3(0.0,0.0,1.0) + reflDir) / 2.0;
+		vec2 probeTex = vec2(mirrorSphereCoord.x, -1.0 * mirrorSphereCoord.y) + vec2(0.5, 0.5);
+		gl_FragColor = texture2D(probeTexture, probeTex);
+
 	}
 `;

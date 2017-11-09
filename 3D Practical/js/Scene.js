@@ -4,14 +4,15 @@ let Scene = function(gl) {
   this.fsTexture = new Shader(gl, gl.FRAGMENT_SHADER, "texture_fs.essl");
   this.textureProgram = new TexturedProgram(gl, this.vsTexture, this.fsTexture);
 
-  this.bodyTexture = new Texture2D(gl, "media/slowpoke/eye.png");
-  this.eyeTexture = new Texture2D(gl, "media/slowpoke/body.png");
+  // this.bodyTexture = new Texture2D(gl, "media/slowpoke/eye.png");
+  // this.eyeTexture = new Texture2D(gl, "media/slowpoke/body.png");
+  this.mirrorTexture = new Texture2D(gl, "media/probe2017fall1.png");
 
   this.materials = [];
   this.materials.push(new Material(gl, this.textureProgram));
   this.materials.push(new Material(gl, this.textureProgram));
-  this.materials[0].colorTexture.set(this.eyeTexture);
-  this.materials[1].colorTexture.set(this.bodyTexture);
+  this.materials[0].probeTexture.set(this.mirrorTexture);
+  this.materials[1].probeTexture.set(this.mirrorTexture);
 
   this.multiMesh = new MultiMesh(gl, "media/slowpoke/Slowpoke.json", this.materials);
   this.gameObjects = []
