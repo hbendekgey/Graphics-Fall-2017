@@ -98,11 +98,6 @@ PerspectiveCamera.prototype.move = function(dt, keysPressed) {
 }; 
 
 PerspectiveCamera.prototype.mouseDown = function() { 
-  console.log("Info:")
-  console.log(this.position)
-  console.log(this.yaw)
-  console.log(this.pitch)
-
   this.isDragging = true; 
   this.mouseDelta.set(); 
 }; 

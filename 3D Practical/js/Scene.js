@@ -4,26 +4,22 @@ let Scene = function(gl) {
   this.fsTexture = new Shader(gl, gl.FRAGMENT_SHADER, "texture_fs.essl");
   this.textureProgram = new TexturedProgram(gl, this.vsTexture, this.fsTexture);
 
-  this.heliTexture = new Texture2D(gl, "media/heli/heli.png");
+  this.bodyTexture = new Texture2D(gl, "media/slowpoke/eye.png");
+  this.eyeTexture = new Texture2D(gl, "media/slowpoke/body.png");
 
   this.materials = [];
   this.materials.push(new Material(gl, this.textureProgram));
-  this.materials[0].colorTexture.set(this.heliTexture);
+  this.materials.push(new Material(gl, this.textureProgram));
+  this.materials[0].colorTexture.set(this.eyeTexture);
+  this.materials[1].colorTexture.set(this.bodyTexture);
 
-  this.multiMesh = new MultiMesh(gl, "media/heli/heli1.json", this.materials);
+  this.multiMesh = new MultiMesh(gl, "media/slowpoke/Slowpoke.json", this.materials);
   this.gameObjects = []
   this.gameObjects.push(new GameObject(this.multiMesh));
-  this.gameObjects[0].rotationAxis.set(new Vec3(0,1,0));
 
-  this.gameObjects[0].orientation = Math.PI;
-  this.gameObjects[0].position.set(new Vec3 (0,-25,-30));
-  this.gameObjects[0].scale.set(new Vec3 (0.5, 0.5, 0.5));
+  this.gameObjects[0].position.set(new Vec3 (0,0,-30));
 
   this.camera = new PerspectiveCamera();
-  this.camera.pitch = (-1.0/2);
-  this.camera.isDragging = true;
-  this.camera.move(1, []);
-  this.camera.isDragging = false;
 
   gl.enable(gl.DEPTH_TEST);
 
