@@ -1,9 +1,11 @@
 Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	attribute vec3 vertexPosition;
-	varying vec4 worldPos;
+	varying vec3 rayDir;
+	uniform mat4 rayDirMatrix;
 
 	void main(void) {
-		gl_Position = vec4(vertexPosition, 1);
-		worldPos = vec4(vertexPosition, 1);
+		vec4 worldPos = vec4(vertexPosition, 1);
+		gl_Position = worldPos;
+		rayDir = normalize((worldPos * rayDirMatrix).xyz);
 	}
 `;

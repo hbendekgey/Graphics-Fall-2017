@@ -2,15 +2,58 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	precision highp float;
 
 	// for applying the texture coloring
-	varying vec4 worldPos;
+	varying vec3 rayDir;
 	uniform sampler2D probeTexture;
-	uniform mat4 rayDirMatrix;
 
-	void main(void) {
-		vec3 rayDir = vec4(worldPos * rayDirMatrix).xyz;
+	uniform vec3 cameraPos;
+
+	float intersectQuadric(mat4 A, vec4 e, vec4 d) {
+		float a = dot(d * A, d);
+		float b = dot(d * A, e) + dot(e * A, d);
+		float c = dot(e * A, e);
+		float discriminant = pow(b, 2.0) - 4.0 * a * c;
+		if (discriminant < 0.0) {
+			return -1.0;
+		}
+		float t1 = ((-1.0 * b) + sqrt(discriminant)) / (2.0 * a);
+		float t2 = ((-1.0 * b) - sqrt(discriminant)) / (2.0 * a);
+		if (t1 < 0.0) {
+			return t2;
+		} else if (t2 < 0.0) {
+			return t1;
+		} else {
+			if (t1 < t2) {
+				return t1;
+			} else {
+				return t2;
+			}
+		}
+	}
+
+	vec4 shadeEnvironment() {
 		vec3 mirrorSphereCoord = normalize(vec3(0.0,0.0,1.0) + rayDir) / 2.0;
 		vec2 probeTex = vec2(mirrorSphereCoord.x, -1.0 * mirrorSphereCoord.y) + vec2(0.5, 0.5);
-		gl_FragColor = texture2D(probeTexture, probeTex);
-
+		return texture2D(probeTexture, probeTex);
 	}
+
+	void main(void) {
+		vec4 e = vec4(cameraPos, 1.0);
+		vec4 d = vec4(rayDir, 0.0);
+
+		mat4 A = mat4(	1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, -9);
+
+		float t = intersectQuadric(A, e, d);
+
+		if (t < 0.0) {
+			gl_FragColor = shadeEnvironment();
+		} else {
+			vec4 r =  e + (d * t);
+			vec3 normal = normalize((A * r + r * A).xyz);
+			gl_FragColor = vec4(dot(normal, rayDir) * normal, 1.0);
+		}
+	}
+
 `;

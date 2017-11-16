@@ -8,17 +8,15 @@ let Scene = function(gl) {
   // this.eyeTexture = new Texture2D(gl, "media/slowpoke/body.png");
   this.mirrorTexture = new Texture2D(gl, "media/probe2017fall1.png");
 
-  this.materials = [];
-  this.materials.push(new Material(gl, this.textureProgram));
-  this.materials.push(new Material(gl, this.textureProgram));
-  this.materials[0].probeTexture.set(this.mirrorTexture);
-  this.materials[1].probeTexture.set(this.mirrorTexture);
-
-  this.multiMesh = new MultiMesh(gl, "media/slowpoke/Slowpoke.json", this.materials);
   this.gameObjects = []
-  this.gameObjects.push(new GameObject(this.multiMesh));
-
-  this.gameObjects[0].position.set(new Vec3 (0,0,-30));
+  // this.materials = [];
+  // this.materials.push(new Material(gl, this.textureProgram));
+  // this.materials.push(new Material(gl, this.textureProgram));
+  // this.materials[0].probeTexture.set(this.mirrorTexture);
+  // this.materials[1].probeTexture.set(this.mirrorTexture);
+  // this.multiMesh = new MultiMesh(gl, "media/slowpoke/Slowpoke.json", this.materials);
+  // this.gameObjects.push(new GameObject(this.multiMesh));
+  // this.gameObjects[0].position.set(new Vec3 (0,0,-30));
 
   this.vsEnvironment = new Shader(gl, gl.VERTEX_SHADER, "environment_vs.essl");
   this.fsEnvironment = new Shader(gl, gl.FRAGMENT_SHADER, "environment_fs.essl");
