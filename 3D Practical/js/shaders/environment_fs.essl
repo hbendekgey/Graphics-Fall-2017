@@ -7,6 +7,11 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 
 	uniform vec3 cameraPos;
 
+	uniform vec4 lightPos[1];
+	uniform vec3 lightPowerDensity[1];
+	uniform vec3 spotMainDir[1];
+
+
 	float intersectQuadric(mat4 A, vec4 e, vec4 d) {
 		float a = dot(d * A, d);
 		float b = dot(d * A, e) + dot(e * A, d);
@@ -36,11 +41,39 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		return texture2D(probeTexture, probeTex);
 	}
 
+	vec4 shadeDiffuse(vec3 worldPos, vec3 worldNormal) {
+		vec4 baseColor = vec4(1.0,1.0,1.0,1.0);
+		vec3 apparentColor = vec3(0,0,0);
+		for (int i = 0; i < 1; i++) {
+			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
+			float cos = dot(normalize(worldNormal), normalize(lightDir));
+			vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
+			float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
+			apparentColor = apparentColor + max(cos, 0.0) * baseColor.xyz * M * pow(spotLight,5.0);
+		}
+		return vec4(apparentColor, 1);
+	}
+
+	vec4 shadeShiny(vec3 worldPos, vec3 worldNormal) {
+		vec4 baseColor = vec4(1.0, 1.0, 1.0, 1.0);
+		vec3 apparentColor = vec3(0,0,0);
+		for (int i = 0; i < 1; i++) {
+			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
+			vec3 h = normalize(lightDir) + normalize(cameraPos - worldPos);
+			float cos = dot(normalize(worldNormal), normalize(h));
+			float shininess = pow(max(cos, 0.0),5.0);
+			vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
+			float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
+			apparentColor = apparentColor + shininess * baseColor.xyz * M * pow(spotLight,5.0);
+		}
+		return vec4(apparentColor, 1);
+	}
+
 	void main(void) {
 		vec4 e = vec4(cameraPos, 1.0);
 		vec4 d = vec4(rayDir, 0.0);
 
-		mat4 A = mat4(	1, 0, 0, 0,
+		mat4 A = mat4(1, 0, 0, 0,
 			0, 1, 0, 0,
 			0, 0, 1, 0,
 			0, 0, 0, -9);
@@ -52,8 +85,9 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		} else {
 			vec4 r =  e + (d * t);
 			vec3 normal = normalize((A * r + r * A).xyz);
-			gl_FragColor = vec4(dot(normal, rayDir) * normal, 1.0);
+			//gl_FragColor = vec4(normal, 1.0);
+			//gl_FragColor = shadeDiffuse(r.xyz, normal);
+			gl_FragColor = shadeShiny(r.xyz, normal);
 		}
 	}
-
 `;

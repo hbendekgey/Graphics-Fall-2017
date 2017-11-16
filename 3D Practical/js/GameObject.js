@@ -17,7 +17,6 @@ GameObject.prototype.updateModelMatrix =
 
 GameObject.prototype.draw = function(camera, lightDirection){ 
   this.updateModelMatrix();
-  Material.lightDirection.set(lightDirection); // 0 if directional and 1 if point for vec4
   Material.modelMatrix.set(this.modelMatrix);
   Material.modelMatrixInverse.set(new Mat4(this.modelMatrix).invert());
   Material.modelViewProjMatrix.set(this.modelMatrix).mul(camera.viewProjMatrix);

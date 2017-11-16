@@ -27,11 +27,14 @@ let Scene = function(gl) {
   this.gameObjects.push(new GameObject(new Mesh(new QuadGeometry(gl), this.environmentMaterial)));
 
 
+  Material.lightPos.at(0).set(new Vec4(0.5,1,-0.5,0).normalize());
+  Material.spotMainDir.at(0).set(new Vec3(Material.lightPos.at(0)).mul(-1));
+  Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
+
+
   this.camera = new PerspectiveCamera();
 
   gl.enable(gl.DEPTH_TEST);
-
-  this.lightDirection = new Vec3(0,1,0);
 
   this.timeAtLastFrame = new Date().getTime();
 };
@@ -51,6 +54,6 @@ Scene.prototype.update = function(gl, keysPressed) {
 
   this.camera.move(dt, keysPressed);
   for (var i = 0; i < this.gameObjects.length; i++) {
-    this.gameObjects[i].draw(this.camera, this.lightDirection);
+    this.gameObjects[i].draw(this.camera);
   }
 };
