@@ -12,7 +12,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	uniform vec3 spotMainDir[1];
 
 
-	float intersectQuadric(mat4 A, vec4 e, vec4 d) {
+	float intersectClippedQuadric(mat4 A, mat4 B, vec4 e, vec4 d) {
 		float a = dot(d * A, d);
 		float b = dot(d * A, e) + dot(e * A, d);
 		float c = dot(e * A, e);
@@ -22,16 +22,20 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		}
 		float t1 = ((-1.0 * b) + sqrt(discriminant)) / (2.0 * a);
 		float t2 = ((-1.0 * b) - sqrt(discriminant)) / (2.0 * a);
-		if (t1 < 0.0) {
+
+		vec4 r1 =  e + (d * t1);
+		vec4 r2 =  e + (d * t2);
+
+		bool t1Valid = t1 >= 0.0 && dot(r1 * B, r1) <= 0.0;
+		bool t2Valid = t2 >= 0.0 && dot(r2 * B, r2) <= 0.0;
+		if (!t1Valid && !t2Valid) {
+			return -1.0;
+		} else if (!t1Valid) {
 			return t2;
-		} else if (t2 < 0.0) {
+		} else if (!t2Valid) {
 			return t1;
 		} else {
-			if (t1 < t2) {
-				return t1;
-			} else {
-				return t2;
-			}
+			return min(t1, t2);
 		}
 	}
 
@@ -78,12 +82,16 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 			0, 0, 1, 0,
 			0, 0, 0, -9);
 
-		float t = intersectQuadric(A, e, d);
+		mat4 B = mat4(	1, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, -4);
+		float t = intersectClippedQuadric(A, B, e, d);
 
 		if (t < 0.0) {
 			gl_FragColor = shadeEnvironment();
 		} else {
-			vec4 r =  e + (d * t);
+			vec4 r = e + d * t;
 			vec3 normal = normalize((A * r + r * A).xyz);
 			//gl_FragColor = vec4(normal, 1.0);
 			//gl_FragColor = shadeDiffuse(r.xyz, normal);
