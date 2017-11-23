@@ -17,6 +17,11 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		float a = dot(d * A, d);
 		float b = dot(d * A, e) + dot(e * A, d);
 		float c = dot(e * A, e);
+
+		if (a == 0.0) {
+			return  -1.0 * c / b;
+		}
+
 		float discriminant = pow(b, 2.0) - 4.0 * a * c;
 		if (discriminant < 0.0) {
 			return -1.0;
