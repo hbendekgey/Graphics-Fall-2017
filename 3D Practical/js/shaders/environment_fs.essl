@@ -10,7 +10,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	uniform vec4 lightPos[1];
 	uniform vec3 lightPowerDensity[1];
 	uniform vec3 spotMainDir[1];
-	uniform mat4 quadrics[4];
+	uniform mat4 quadrics[6];
 
 
 	float intersectClippedQuadric(mat4 A, mat4 B, vec4 e, vec4 d) {
@@ -77,7 +77,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	bool findBestHit(vec4 e, vec4 d, out int bestBrdf, out mat4 bestA, out float bestT) {
 		bestT = 1000000.0;
 		bool foundHit = false;
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 3; i++) {
 			float newT = intersectClippedQuadric(quadrics[2*i], quadrics[2*i+1], e, d);
 			if (newT > 0.0 && newT < bestT) {
 				bestT = newT;

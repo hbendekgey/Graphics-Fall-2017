@@ -25,17 +25,26 @@ ClippedQuadric.prototype.setUnitCylinder = function(){
 		0, 0, 0, -1);
 }
 
+ClippedQuadric.prototype.setUnitCone = function(){
+  this.surfaceCoeffMatrix.set(1, 0, 0, 0,
+		0, -1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, -1);
+  this.clipperCoeffMatrix.set(0, 0, 0, 0,
+		0, 1, 0, 2,
+		0, 0, 0, 0,
+		0, 0, 0, 0);
+}
+
 ClippedQuadric.prototype.transform = function(transformationMatrix){
-  let currentSurface = this.surfaceCoeffMatrix;
-  let currentClipper = this.clipperCoeffMatrix
   let inverseT = new Mat4(transformationMatrix).invert();
   let inverseTTranspose = new Mat4(inverseT).transpose();
-  this.surfaceCoeffMatrix.set(inverseT).mul(currentSurface).mul(inverseTTranspose);
-  this.clipperCoeffMatrix.set(inverseT).mul(currentClipper).mul(inverseTTranspose);
+  this.surfaceCoeffMatrix.premul(inverseT).mul(inverseTTranspose);
+  this.clipperCoeffMatrix.premul(inverseT).mul(inverseTTranspose);
 }
 
 ClippedQuadric.prototype.transformClipper = function(transformationMatrix){
-  let currentClipper = this.clipperCoeffMatrix
   let inverseT = new Mat4(transformationMatrix).invert();
-  this.clipperCoeffMatrix.set(inverseT).mul(currentClipper).mul(inverseT.transpose());
+  let inverseTTranspose = new Mat4(inverseT).transpose();
+  this.clipperCoeffMatrix.premul(inverseT).mul(inverseTTranspose);
 }

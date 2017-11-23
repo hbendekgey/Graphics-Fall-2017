@@ -22,13 +22,44 @@ let Scene = function(gl) {
   Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
 
   let sphere = new ClippedQuadric(new Mat4(), new Mat4());
-  let cylinder = new ClippedQuadric(new Mat4(), new Mat4());
+  let cone = new ClippedQuadric(new Mat4(), new Mat4());
   sphere.setUnitSphere();
-  cylinder.setUnitCylinder();
+  cone.setUnitCone();
+  sphere.transform(new Mat4().translate(0,2,0));
+  cone.transform(new Mat4().translate(0,2,0));
+
   Material.quadrics.at(0).set(sphere.surfaceCoeffMatrix);
   Material.quadrics.at(1).set(sphere.clipperCoeffMatrix);
-  Material.quadrics.at(2).set(cylinder.surfaceCoeffMatrix);
-  Material.quadrics.at(3).set(cylinder.clipperCoeffMatrix);
+  Material.quadrics.at(2).set(cone.surfaceCoeffMatrix);
+  Material.quadrics.at(3).set(cone.clipperCoeffMatrix);
+
+  // let newCylinder = new ClippedQuadric(new Mat4(), new Mat4());
+  // newCylinder.setUnitCylinder();
+  // newCylinder.transform(new Mat4().translate(0,0,2));
+  // Material.quadrics.at(4).set(newCylinder.surfaceCoeffMatrix);
+  // Material.quadrics.at(5).set(newCylinder.clipperCoeffMatrix);
+
+  // Material.quadrics.at(4).set(
+  //     1, 0, 0, 0,
+  //     0, 1, 0, 0,
+  //     0, 0, 1, 0,
+  //     0, 0, 0, 0);
+  // //clipper
+  // Material.quadrics.at(5).set(
+  //     1, 0, 0, 0,
+  //     0, 1, 0, 0,
+  //     0, 0, 1, 0,
+  //     0, 0, 0, -100);
+
+  // Material.quadrics.at(4).set(0, 0, 0, 0,
+  //           0, 0, 0, 1,
+  //           0, 0, 0, 0,
+  //           0, 0, 0, 0);
+  //
+  // Material.quadrics.at(5).set(1, 0, 0, 0,
+  //       0, 0, 0, 0,
+  //       0, 0, 1, 0,
+  //       0, 0, 0, -100);
 
   // Material.quadrics.at(0).set(
   //     1, 0, 0, 0,
