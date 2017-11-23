@@ -10,7 +10,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	uniform vec4 lightPos[1];
 	uniform vec3 lightPowerDensity[1];
 	uniform vec3 spotMainDir[1];
-	uniform mat4 quadrics[2];
+	uniform mat4 quadrics[4];
 
 
 	float intersectClippedQuadric(mat4 A, mat4 B, vec4 e, vec4 d) {
@@ -74,20 +74,35 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		return vec4(apparentColor, 1);
 	}
 
+	bool findBestHit(vec4 e, vec4 d, out int bestBrdf, out mat4 bestA, out float bestT) {
+		bestT = 1000000.0;
+		bool foundHit = false;
+		for (int i = 0; i < 2; i++) {
+			float newT = intersectClippedQuadric(quadrics[2*i], quadrics[2*i+1], e, d);
+			if (newT > 0.0 && newT < bestT) {
+				bestT = newT;
+				bestBrdf = i;
+				bestA = quadrics[2*i];
+				foundHit = true;
+			}
+		}
+		return foundHit;
+	}
+
 	void main(void) {
 		vec4 e = vec4(cameraPos, 1.0);
 		vec4 d = vec4(rayDir, 0.0);
 
-		float t = intersectClippedQuadric(quadrics[0], quadrics[1], e, d);
-
-		if (t < 0.0) {
-			gl_FragColor = shadeEnvironment();
-		} else {
-			vec4 r = e + d * t;
-			vec3 normal = normalize((quadrics[0] * r + r * quadrics[0]).xyz);
-			//gl_FragColor = vec4(normal, 1.0);
-			//gl_FragColor = shadeDiffuse(r.xyz, normal);
+		int bestBrdf;
+		mat4 bestA;
+		float bestT;
+		bool found = findBestHit(e, d, bestBrdf, bestA, bestT);
+		if (found) {
+			vec4 r = e + d * bestT;
+			vec3 normal = normalize((bestA * r + r * bestA).xyz);
 			gl_FragColor = shadeShiny(r.xyz, normal);
+		} else {
+			gl_FragColor = shadeEnvironment();
 		}
 	}
 `;

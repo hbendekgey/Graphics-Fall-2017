@@ -43,6 +43,18 @@ let Scene = function(gl) {
       0, 0, 1, 0,
       0, 0, 0, -1).scale(0.5, 2, 0.9);
 
+  Material.quadrics.at(2).set(
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 6,
+      0, 0, 0, 8);//.translate(0,0,-3);
+  //clipper
+  Material.quadrics.at(3).set(
+      0.5 * 0.5, 0, 0, 0,
+      0, 2 * 2, 0, 0,
+      0, 0, .9* .9, 6 * .9,
+      0, 0, 0, 8);//.translate(0,0,-3);
+
   this.camera = new PerspectiveCamera();
 
   gl.enable(gl.DEPTH_TEST);
