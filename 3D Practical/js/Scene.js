@@ -31,6 +31,17 @@ let Scene = function(gl) {
   Material.spotMainDir.at(0).set(new Vec3(Material.lightPos.at(0)).mul(-1));
   Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
 
+  Material.quadrics.at(0).set(
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, -1);
+  //clipper
+  Material.quadrics.at(1).set(
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, -1).scale(0.5, 2, 0.9);
 
   this.camera = new PerspectiveCamera();
 
