@@ -4,19 +4,9 @@ let Scene = function(gl) {
   this.fsTexture = new Shader(gl, gl.FRAGMENT_SHADER, "texture_fs.essl");
   this.textureProgram = new TexturedProgram(gl, this.vsTexture, this.fsTexture);
 
-  // this.bodyTexture = new Texture2D(gl, "media/slowpoke/eye.png");
-  // this.eyeTexture = new Texture2D(gl, "media/slowpoke/body.png");
   this.mirrorTexture = new Texture2D(gl, "media/probe2017fall1.png");
 
   this.gameObjects = []
-  // this.materials = [];
-  // this.materials.push(new Material(gl, this.textureProgram));
-  // this.materials.push(new Material(gl, this.textureProgram));
-  // this.materials[0].probeTexture.set(this.mirrorTexture);
-  // this.materials[1].probeTexture.set(this.mirrorTexture);
-  // this.multiMesh = new MultiMesh(gl, "media/slowpoke/Slowpoke.json", this.materials);
-  // this.gameObjects.push(new GameObject(this.multiMesh));
-  // this.gameObjects[0].position.set(new Vec3 (0,0,-30));
 
   this.vsEnvironment = new Shader(gl, gl.VERTEX_SHADER, "environment_vs.essl");
   this.fsEnvironment = new Shader(gl, gl.FRAGMENT_SHADER, "environment_fs.essl");
@@ -31,29 +21,38 @@ let Scene = function(gl) {
   Material.spotMainDir.at(0).set(new Vec3(Material.lightPos.at(0)).mul(-1));
   Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
 
-  Material.quadrics.at(0).set(
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, -1);
-  //clipper
-  Material.quadrics.at(1).set(
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, -1).scale(0.5, 2, 0.9);
+  let sphere = new ClippedQuadric(new Mat4(), new Mat4());
+  let cylinder = new ClippedQuadric(new Mat4(), new Mat4());
+  sphere.setUnitSphere();
+  cylinder.setUnitCylinder();
+  Material.quadrics.at(0).set(sphere.surfaceCoeffMatrix);
+  Material.quadrics.at(1).set(sphere.clipperCoeffMatrix);
+  Material.quadrics.at(2).set(cylinder.surfaceCoeffMatrix);
+  Material.quadrics.at(3).set(cylinder.clipperCoeffMatrix);
 
-  Material.quadrics.at(2).set(
-      1, 0, 0, 0,
-      0, 1, 0, 0,
-      0, 0, 1, 6,
-      0, 0, 0, 8);//.translate(0,0,-3);
-  //clipper
-  Material.quadrics.at(3).set(
-      0.5 * 0.5, 0, 0, 0,
-      0, 2 * 2, 0, 0,
-      0, 0, .9* .9, 6 * .9,
-      0, 0, 0, 8);//.translate(0,0,-3);
+  // Material.quadrics.at(0).set(
+  //     1, 0, 0, 0,
+  //     0, 1, 0, 0,
+  //     0, 0, 1, 0,
+  //     0, 0, 0, -1);
+  // //clipper
+  // Material.quadrics.at(1).set(
+  //     1, 0, 0, 0,
+  //     0, 1, 0, 0,
+  //     0, 0, 1, 0,
+  //     0, 0, 0, -1).scale(0.5, 2, 0.9);
+  //
+  // Material.quadrics.at(2).set(
+  //     1, 0, 0, 0,
+  //     0, 1, 0, 0,
+  //     0, 0, 1, 6,
+  //     0, 0, 0, 8);//.translate(0,0,-3);
+  // //clipper
+  // Material.quadrics.at(3).set(
+  //     0.5 * 0.5, 0, 0, 0,
+  //     0, 2 * 2, 0, 0,
+  //     0, 0, .9* .9, 6 * .9,
+  //     0, 0, 0, 8);//.translate(0,0,-3);
 
   this.camera = new PerspectiveCamera();
 

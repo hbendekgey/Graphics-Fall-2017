@@ -96,8 +96,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		int bestBrdf;
 		mat4 bestA;
 		float bestT;
-		bool found = findBestHit(e, d, bestBrdf, bestA, bestT);
-		if (found) {
+		if (findBestHit(e, d, bestBrdf, bestA, bestT)) {
 			vec4 r = e + d * bestT;
 			vec3 normal = normalize((bestA * r + r * bestA).xyz);
 			gl_FragColor = shadeShiny(r.xyz, normal);
