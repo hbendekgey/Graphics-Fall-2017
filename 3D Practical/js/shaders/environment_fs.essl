@@ -10,8 +10,8 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	uniform vec4 lightPos[1];
 	uniform vec3 lightPowerDensity[1];
 	uniform vec3 spotMainDir[1];
-	uniform mat4 quadrics[7];
-	uniform vec4 brdfs[3];
+	uniform mat4 quadrics[15];
+	uniform vec4 brdfs[7];
 
 
 	float intersectClippedQuadric(mat4 A, mat4 B, vec4 e, vec4 d) {
@@ -127,14 +127,28 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	    return vec3(0.0, 0.0, 1.0) * w + vec3(1.0, 1.0, 1.0) * (1.0 - w);
 	}
 
+
+    bool shadowCast(vec4 e, vec4 d) {
+    	float t;
+		for (int i = 1; i < 7; i++) {
+			t = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], e + normalize(vec4(d.xyz,0)) / 10.0, vec4(d.xyz,0.0));
+			if (t > 0.00 && (t < 1.0 || d.w == 0.0)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	vec4 shadeDiffuse(vec3 worldPos, vec3 worldNormal, vec3 baseColor) {
 		vec3 apparentColor = vec3(0,0,0);
 		for (int i = 0; i < 1; i++) {
 			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
-			float cos = dot(normalize(worldNormal), normalize(lightDir));
-			vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
-			float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
-			apparentColor = apparentColor + max(cos, 0.0) * baseColor * M * pow(spotLight,5.0);
+			if (!shadowCast(vec4(worldPos,1),vec4(lightDir,lightPos[i].w))) {
+				float cos = dot(normalize(worldNormal), normalize(lightDir));
+				vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
+				float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
+				apparentColor = apparentColor + max(cos, 0.0) * baseColor * M * pow(spotLight,5.0);
+			}
 		}
 		return vec4(apparentColor, 1);
 	}
@@ -145,12 +159,14 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		vec3 apparentColor = vec3(0,0,0);
 		for (int i = 0; i < 1; i++) {
 			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
-			vec3 h = normalize(lightDir) + normalize(cameraPos - worldPos);
-			float cos = dot(normalize(worldNormal), normalize(h));
-			float shininess = pow(max(cos, 0.0),5.0);
-			vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
-			float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
-			apparentColor = apparentColor + shininess * baseColor.xyz * M * pow(spotLight,5.0);
+			if (!shadowCast(vec4(worldPos,1),vec4(lightDir,lightPos[i].w))) {
+				vec3 h = normalize(lightDir) + normalize(cameraPos - worldPos);
+				float cos = dot(normalize(worldNormal), normalize(h));
+				float shininess = pow(max(cos, 0.0),5.0);
+				vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
+				float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
+				apparentColor = apparentColor + shininess * baseColor.xyz * M * pow(spotLight,5.0);
+			}
 		}
 		return vec4(apparentColor, 1);
 	}
@@ -165,7 +181,6 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		return shadeDiffuse(worldPos, worldNormal, baseColor);
     }
 
-
 	bool findBestHit(vec4 e, vec4 d, out vec4 bestBrdf, out mat4 bestA, out float bestT) {
 		bestT = 1000000.0;
 		bool foundHit = false;
@@ -179,7 +194,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 			foundHit = true;
 		}
 		
-		for (int i = 1; i < 3; i++) {
+		for (int i = 1; i < 7; i++) {
 			newT = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], e, d);
 			if (newT > 0.0 && newT < bestT) {
 				bestT = newT;
@@ -202,9 +217,12 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 			vec4 r = e + d * bestT;
 			vec3 normal = normalize((bestA * r + r * bestA).xyz);
 			if (bestBrdf.w == 0.0) {
+				gl_FragColor = shadeBoard(r.xyz, normal);
+
+			} else if (bestBrdf.w == 1.0) {
 				gl_FragColor = shadeShiny(r.xyz, normal);
 			} else {
-				gl_FragColor = shadeBoard(r.xyz, normal);
+				gl_FragColor = shadeDiffuse(r.xyz, normal, vec3(0.8,0.8,0.8));
 			}
 		} else {
 			gl_FragColor = shadeEnvironment();

@@ -25,13 +25,24 @@ ClippedQuadric.prototype.setUnitCylinder = function(){
 		0, 0, 0, -1);
 }
 
-ClippedQuadric.prototype.setUnitCone = function(){
+ClippedQuadric.prototype.setUnitHyperboloid = function(){
   this.surfaceCoeffMatrix.set(1, 0, 0, 0,
 		0, -1, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, -1);
   this.clipperCoeffMatrix.set(0, 0, 0, 0,
-		0, 1, 0, 2,
+		0, 1, 0, 3,
+		0, 0, 0, 0,
+		0, 0, 0, 0);
+}
+
+ClippedQuadric.prototype.setUnitCone = function(){
+  this.surfaceCoeffMatrix.set(1, 0, 0, 0,
+		0, -1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 0);
+  this.clipperCoeffMatrix.set(0, 0, 0, 0,
+		0, 1, 0, 1,
 		0, 0, 0, 0,
 		0, 0, 0, 0);
 }
