@@ -10,7 +10,8 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	uniform vec4 lightPos[1];
 	uniform vec3 lightPowerDensity[1];
 	uniform vec3 spotMainDir[1];
-	uniform mat4 quadrics[6];
+	uniform mat4 quadrics[7];
+	uniform vec4 brdfs[3];
 
 
 	float intersectClippedQuadric(mat4 A, mat4 B, vec4 e, vec4 d) {
@@ -19,7 +20,13 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		float c = dot(e * A, e);
 
 		if (a == 0.0) {
-			return  -1.0 * c / b;
+			float t =  -1.0 * c / b;
+			vec4 r =  e + (d * t);
+			if (!(t >= 0.0 && dot(r * B, r) <= 0.0)) {
+				return -1.0;
+			} else {
+				return t;
+			}
 		}
 
 		float discriminant = pow(b, 2.0) - 4.0 * a * c;
@@ -45,8 +52,46 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		}
 	}
 
+	float intersectClippedQuadric(mat4 A, mat4 B, mat4 C, vec4 e, vec4 d) {
+		float a = dot(d * A, d);
+		float b = dot(d * A, e) + dot(e * A, d);
+		float c = dot(e * A, e);
+
+		if (a == 0.0) {
+			float t =  -1.0 * c / b;
+			vec4 r =  e + (d * t);
+			if (!(t >= 0.0 && dot(r * B, r) <= 0.0 && dot(r * C, r) <= 0.0)) {
+				return -1.0;
+			} else {
+				return t;
+			}
+		}
+
+		float discriminant = pow(b, 2.0) - 4.0 * a * c;
+		if (discriminant < 0.0) {
+			return -1.0;
+		}
+		float t1 = ((-1.0 * b) + sqrt(discriminant)) / (2.0 * a);
+		float t2 = ((-1.0 * b) - sqrt(discriminant)) / (2.0 * a);
+
+		vec4 r1 =  e + (d * t1);
+		vec4 r2 =  e + (d * t2);
+
+		bool t1Valid = t1 >= 0.0 && dot(r1 * B, r1) <= 0.0 && dot(r1 * C, r1) <= 0.0;
+		bool t2Valid = t2 >= 0.0 && dot(r2 * B, r2) <= 0.0 && dot(r2 * C, r2) <= 0.0;
+		if (!t1Valid && !t2Valid) {
+			return -1.0;
+		} else if (!t1Valid) {
+			return t2;
+		} else if (!t2Valid) {
+			return t1;
+		} else {
+			return min(t1, t2);
+		}
+	}
+
 	vec4 shadeEnvironment() {
-		vec3 mirrorSphereCoord = normalize(vec3(0.0,0.0,1.0) + rayDir) / 2.0;
+		vec3 mirrorSphereCoord = normalize(vec3(0.0,0.0,1.0) + normalize(rayDir)) / 2.0;
 		vec2 probeTex = vec2(mirrorSphereCoord.x, -1.0 * mirrorSphereCoord.y) + vec2(0.5, 0.5);
 		return texture2D(probeTexture, probeTex);
 	}
@@ -79,15 +124,27 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		return vec4(apparentColor, 1);
 	}
 
-	bool findBestHit(vec4 e, vec4 d, out int bestBrdf, out mat4 bestA, out float bestT) {
+	bool findBestHit(vec4 e, vec4 d, out vec4 bestBrdf, out mat4 bestA, out float bestT) {
 		bestT = 1000000.0;
 		bool foundHit = false;
-		for (int i = 0; i < 3; i++) {
-			float newT = intersectClippedQuadric(quadrics[2*i], quadrics[2*i+1], e, d);
+
+		// for ground
+		float newT = intersectClippedQuadric(quadrics[0], quadrics[1], quadrics[2], e, d);
+		if (newT > 0.0 && newT < bestT) {
+			bestT = newT;
+			bestBrdf = brdfs[0];
+			bestA = quadrics[0];
+			foundHit = true;
+		}
+		
+		// brdf=1, quadrics=3,4
+		// brdf=2, quadrics=5,6 
+		for (int i = 1; i < 3; i++) {
+			newT = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], e, d);
 			if (newT > 0.0 && newT < bestT) {
 				bestT = newT;
-				bestBrdf = i;
-				bestA = quadrics[2*i];
+				bestBrdf = brdfs[i];
+				bestA = quadrics[2*i+1];
 				foundHit = true;
 			}
 		}
@@ -98,13 +155,17 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		vec4 e = vec4(cameraPos, 1.0);
 		vec4 d = vec4(rayDir, 0.0);
 
-		int bestBrdf;
+		vec4 bestBrdf;
 		mat4 bestA;
 		float bestT;
 		if (findBestHit(e, d, bestBrdf, bestA, bestT)) {
 			vec4 r = e + d * bestT;
 			vec3 normal = normalize((bestA * r + r * bestA).xyz);
-			gl_FragColor = shadeShiny(r.xyz, normal);
+			if (bestBrdf.w == 0.0) {
+				gl_FragColor = shadeShiny(r.xyz, normal);
+			} else {
+				gl_FragColor = shadeDiffuse(r.xyz, normal);
+			}
 		} else {
 			gl_FragColor = shadeEnvironment();
 		}

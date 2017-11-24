@@ -21,27 +21,39 @@ let Scene = function(gl) {
   Material.spotMainDir.at(0).set(new Vec3(Material.lightPos.at(0)).mul(-1));
   Material.lightPowerDensity.at(0).set(new Vec3(1,1,1));
 
-  let sphere = new ClippedQuadric(new Mat4(), new Mat4());
-  let cone = new ClippedQuadric(new Mat4(), new Mat4());
-  sphere.setUnitSphere();
-  cone.setUnitCone();
-  sphere.transform(new Mat4().translate(0,2,0));
-  cone.transform(new Mat4().translate(0,2,0));
 
-  Material.quadrics.at(0).set(sphere.surfaceCoeffMatrix);
-  Material.quadrics.at(1).set(sphere.clipperCoeffMatrix);
-  Material.quadrics.at(2).set(cone.surfaceCoeffMatrix);
-  Material.quadrics.at(3).set(cone.clipperCoeffMatrix);
-
-  Material.quadrics.at(4).set(0, 0, 0, 0,
+  Material.quadrics.at(0).set(0, 0, 0, 0,
             0, 0, 0, 1,
             0, 0, 0, 0,
             0, 0, 0, 0);
   
-  Material.quadrics.at(5).set(1, 0, 0, 0,
+  Material.quadrics.at(1).set(1, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, -64);
+  Material.quadrics.at(2).set(0, 0, 0, 0,
         0, 0, 0, 0,
         0, 0, 1, 0,
-        0, 0, 0, -100);
+        0, 0, 0, -64);
+
+  Material.brdfs.at(0).set(new Vec4(0,0,0,1));
+
+
+  let sphere = new ClippedQuadric(new Mat4(), new Mat4());
+  let cone = new ClippedQuadric(new Mat4(), new Mat4());
+  sphere.setUnitSphere();
+  cone.setUnitCone();
+  sphere.transform(new Mat4().scale(.25,.25,.25).translate(0,.5,0));
+  cone.transform(new Mat4().scale(.25,.25,1).translate(0,.5,0));
+
+  Material.quadrics.at(3).set(sphere.surfaceCoeffMatrix);
+  Material.quadrics.at(4).set(sphere.clipperCoeffMatrix);
+  Material.brdfs.at(1).set(new Vec4(0,0,0,0));
+
+  Material.quadrics.at(5).set(cone.surfaceCoeffMatrix);
+  Material.quadrics.at(6).set(cone.clipperCoeffMatrix);
+  Material.brdfs.at(2).set(new Vec4(0,0,0,0));
+
 
   this.camera = new PerspectiveCamera();
 
