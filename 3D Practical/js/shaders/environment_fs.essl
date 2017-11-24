@@ -7,9 +7,8 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 
 	uniform vec3 cameraPos;
 
-	uniform vec4 lightPos[1];
-	uniform vec3 lightPowerDensity[1];
-	uniform vec3 spotMainDir[1];
+	uniform vec4 lightPos[2];
+	uniform vec3 lightPowerDensity[2];
 	uniform mat4 quadrics[15];
 	uniform vec4 brdfs[7];
 
@@ -131,7 +130,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
     bool shadowCast(vec4 e, vec4 d) {
     	float t;
 		for (int i = 1; i < 7; i++) {
-			t = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], e + normalize(vec4(d.xyz,0)) / 10.0, vec4(d.xyz,0.0));
+			t = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], e + (normalize(vec4(d.xyz,0.0)) / 10.0), vec4(d.xyz,0.0));
 			if (t > 0.00 && (t < 1.0 || d.w == 0.0)) {
 				return true;
 			}
@@ -141,13 +140,12 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 
 	vec4 shadeDiffuse(vec3 worldPos, vec3 worldNormal, vec3 baseColor) {
 		vec3 apparentColor = vec3(0,0,0);
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 2; i++) {
 			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
 			if (!shadowCast(vec4(worldPos,1),vec4(lightDir,lightPos[i].w))) {
 				float cos = dot(normalize(worldNormal), normalize(lightDir));
 				vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
-				float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
-				apparentColor = apparentColor + max(cos, 0.0) * baseColor * M * pow(spotLight,5.0);
+				apparentColor = apparentColor + max(cos, 0.0) * baseColor * M;
 			}
 		}
 		return vec4(apparentColor, 1);
@@ -157,15 +155,14 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	vec4 shadeShiny(vec3 worldPos, vec3 worldNormal) {
 		vec4 baseColor = vec4(1.0, 1.0, 1.0, 1.0);
 		vec3 apparentColor = vec3(0,0,0);
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 2; i++) {
 			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
 			if (!shadowCast(vec4(worldPos,1),vec4(lightDir,lightPos[i].w))) {
 				vec3 h = normalize(lightDir) + normalize(cameraPos - worldPos);
 				float cos = dot(normalize(worldNormal), normalize(h));
 				float shininess = pow(max(cos, 0.0),5.0);
 				vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
-				float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
-				apparentColor = apparentColor + shininess * baseColor.xyz * M * pow(spotLight,5.0);
+				apparentColor = apparentColor + shininess * baseColor.xyz * M;
 			}
 		}
 		return vec4(apparentColor, 1);

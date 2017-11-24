@@ -17,10 +17,11 @@ let Scene = function(gl) {
   this.gameObjects.push(new GameObject(new Mesh(new QuadGeometry(gl), this.environmentMaterial)));
 
 
-  Material.lightPos.at(0).set(new Vec4(1.0,0.8,1.0,0).normalize());
-  Material.spotMainDir.at(0).set(new Vec3(Material.lightPos.at(0)).mul(-1));
+  Material.lightPos.at(0).set(new Vec4(1,0.8,1,0).normalize());
   Material.lightPowerDensity.at(0).set(new Vec3(1.2,1.2,1.2));
 
+  Material.lightPos.at(1).set(new Vec4(1.5,1.5,-3.5,1));
+  Material.lightPowerDensity.at(1).set(new Vec3(5,5,5));
 
   Material.quadrics.at(0).set(0, 0, 0, 0,
             0, 0, 0, 1,
@@ -60,8 +61,6 @@ let Scene = function(gl) {
 
   Material.quadrics.at(7).set(hyperboloid.surfaceCoeffMatrix);
   Material.quadrics.at(8).set(hyperboloid.clipperCoeffMatrix);
-  console.log(hyperboloid.surfaceCoeffMatrix);
-  console.log(hyperboloid.clipperCoeffMatrix);
   Material.brdfs.at(3).set(new Vec4(0,0,0,2));
 
   let head = new ClippedQuadric(new Mat4(), new Mat4());
