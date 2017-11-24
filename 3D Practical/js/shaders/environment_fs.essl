@@ -96,18 +96,49 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		return texture2D(probeTexture, probeTex);
 	}
 
-	vec4 shadeDiffuse(vec3 worldPos, vec3 worldNormal) {
-		vec4 baseColor = vec4(1.0,1.0,1.0,1.0);
+	float snoise(vec3 r) {
+  		vec3 s = vec3(7502.0, 22777.0, 4767.0);
+  		float w = 0.0;
+  		for(int i=0; i<16; i++) {
+    		w += sin( dot(s - vec3(32768, 32768, 32768), r * 40.0) / 65536.0);
+    		s = mod(s, 32768.0) * 2.0 + floor(s / 32768.0);
+  		}
+  		return w / 32.0 + 0.5;
+	}
+
+  	vec3 woodColor(vec3 worldPos) {
+	    float scale = 4.0;
+	    float turbulence = 4.0;
+	    float period = 8.0;
+	    float sharpness = 1.0;
+	    float w = worldPos.x * period + pow(snoise(worldPos * scale), sharpness) * turbulence; 
+	    w -= floor(w);
+	    return vec3(1.0, 0.3, 0.0) * w + vec3(0.35, 0.1, 0.05) * (1.0 - w);
+	}
+
+  	vec3 marbleColor(vec3 worldPos) {
+		float scale = 12.0;
+    	float turbulence = 18.0;
+    	float period = 12.0;
+    	float sharpness = 1.0;
+
+	    float w = worldPos.x * period + pow(snoise(worldPos * scale), sharpness) * turbulence; 
+	    w = pow(sin(w) * 0.5 + 0.5, 4.0);
+	    return vec3(0.0, 0.0, 1.0) * w + vec3(1.0, 1.0, 1.0) * (1.0 - w);
+	}
+
+	vec4 shadeDiffuse(vec3 worldPos, vec3 worldNormal, vec3 baseColor) {
 		vec3 apparentColor = vec3(0,0,0);
 		for (int i = 0; i < 1; i++) {
 			vec3 lightDir = lightPos[i].xyz - (worldPos * lightPos[i].w);
 			float cos = dot(normalize(worldNormal), normalize(lightDir));
 			vec3 M = lightPowerDensity[i] / dot(lightDir,lightDir);
 			float spotLight = max(dot(normalize(-1.0 * lightDir),normalize(spotMainDir[i])),0.0);
-			apparentColor = apparentColor + max(cos, 0.0) * baseColor.xyz * M * pow(spotLight,5.0);
+			apparentColor = apparentColor + max(cos, 0.0) * baseColor * M * pow(spotLight,5.0);
 		}
 		return vec4(apparentColor, 1);
 	}
+
 
 	vec4 shadeShiny(vec3 worldPos, vec3 worldNormal) {
 		vec4 baseColor = vec4(1.0, 1.0, 1.0, 1.0);
@@ -124,6 +155,17 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		return vec4(apparentColor, 1);
 	}
 
+	vec4 shadeBoard(vec3 worldPos, vec3 worldNormal) {
+		vec3 baseColor;
+		if (mod(floor(worldPos.x ) + floor(worldPos.z ), 2.0) == 1.0) {
+			baseColor = marbleColor(worldPos);
+		} else {
+			baseColor = woodColor(worldPos);
+		}
+		return shadeDiffuse(worldPos, worldNormal, baseColor);
+    }
+
+
 	bool findBestHit(vec4 e, vec4 d, out vec4 bestBrdf, out mat4 bestA, out float bestT) {
 		bestT = 1000000.0;
 		bool foundHit = false;
@@ -137,8 +179,6 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 			foundHit = true;
 		}
 		
-		// brdf=1, quadrics=3,4
-		// brdf=2, quadrics=5,6 
 		for (int i = 1; i < 3; i++) {
 			newT = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], e, d);
 			if (newT > 0.0 && newT < bestT) {
@@ -164,7 +204,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 			if (bestBrdf.w == 0.0) {
 				gl_FragColor = shadeShiny(r.xyz, normal);
 			} else {
-				gl_FragColor = shadeDiffuse(r.xyz, normal);
+				gl_FragColor = shadeBoard(r.xyz, normal);
 			}
 		} else {
 			gl_FragColor = shadeEnvironment();

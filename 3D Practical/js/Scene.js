@@ -30,11 +30,11 @@ let Scene = function(gl) {
   Material.quadrics.at(1).set(1, 0, 0, 0,
         0, 0, 0, 0,
         0, 0, 0, 0,
-        0, 0, 0, -64);
+        0, 0, 0, -16);
   Material.quadrics.at(2).set(0, 0, 0, 0,
         0, 0, 0, 0,
         0, 0, 1, 0,
-        0, 0, 0, -64);
+        0, 0, 0, -16);
 
   Material.brdfs.at(0).set(new Vec4(0,0,0,1));
 
@@ -43,8 +43,8 @@ let Scene = function(gl) {
   let cone = new ClippedQuadric(new Mat4(), new Mat4());
   sphere.setUnitSphere();
   cone.setUnitCone();
-  sphere.transform(new Mat4().scale(.25,.25,.25).translate(0,.5,0));
-  cone.transform(new Mat4().scale(.25,.25,1).translate(0,.5,0));
+  sphere.transform(new Mat4().scale(.2,.2,.2).translate(.5,.4,-3.5));
+  cone.transform(new Mat4().scale(.2,.2,1).translate(.5,.4,-3.5));
 
   Material.quadrics.at(3).set(sphere.surfaceCoeffMatrix);
   Material.quadrics.at(4).set(sphere.clipperCoeffMatrix);
@@ -56,6 +56,7 @@ let Scene = function(gl) {
 
 
   this.camera = new PerspectiveCamera();
+  this.camera.position = new Vec3(0,1,0);
 
   gl.enable(gl.DEPTH_TEST);
 
