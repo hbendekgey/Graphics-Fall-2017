@@ -47,11 +47,11 @@ Material.dummy = new Proxy(new Function(), {
 });
 
 Object.defineProperty(Material, "cameraPos", {value: new Vec3()} );
-Object.defineProperty(Material, "lightPos", {value: new Vec4Array(2)} );
-Object.defineProperty(Material, "lightPowerDensity", {value: new Vec3Array(2)} );
+Object.defineProperty(Material, "lightPos", {value: new Vec4Array(3)} );
+Object.defineProperty(Material, "lightPowerDensity", {value: new Vec3Array(3)} );
 Object.defineProperty(Material, "modelMatrix", {value: new Mat4()} );
 Object.defineProperty(Material, "rayDirMatrix", {value: new Mat4()} );
 Object.defineProperty(Material, "modelMatrixInverse", {value: new Mat4()} );
 Object.defineProperty(Material, "modelViewProjMatrix", {value: new Mat4()} );
-Object.defineProperty(Material, "quadrics", {value: new Mat4Array(15)} );
-Object.defineProperty(Material, "brdfs", {value: new Vec4Array(7)} );
+Object.defineProperty(Material, "quadrics", {value: new Mat4Array(60)} ); // 15
+Object.defineProperty(Material, "brdfs", {value: new Vec4Array(20)} );
