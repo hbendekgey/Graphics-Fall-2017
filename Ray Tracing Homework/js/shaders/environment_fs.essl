@@ -89,12 +89,6 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 		}
 	}
 
-	vec4 shadeEnvironment() {
-		vec3 mirrorSphereCoord = normalize(vec3(0.0,0.0,1.0) + normalize(rayDir)) / 2.0;
-		vec2 probeTex = vec2(mirrorSphereCoord.x, -1.0 * mirrorSphereCoord.y) + vec2(0.5, 0.5);
-		return texture2D(probeTexture, probeTex);
-	}
-
 	float snoise(vec3 r) {
   		vec3 s = vec3(7502.0, 22777.0, 4767.0);
   		float w = 0.0;
@@ -131,6 +125,13 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
     	float t;
 		for (int i = 1; i < 15; i++) {
 			t = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], e + (normalize(vec4(d.xyz,0.0)) / 10.0), vec4(d.xyz,0.0));
+			if (t > 0.00 && (t < 1.0 || d.w == 0.0)) {
+				return true;
+			}
+		}
+
+		for (int i = 15; i < 16; i++) {
+			t = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], quadrics[(2*i)+3], e + (normalize(vec4(d.xyz,0.0)) / 10.0), vec4(d.xyz,0.0));
 			if (t > 0.00 && (t < 1.0 || d.w == 0.0)) {
 				return true;
 			}
@@ -200,7 +201,51 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 				foundHit = true;
 			}
 		}
+
+		for (int i = 15; i < 16; i++) {
+			newT = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], quadrics[2*i+3], e, d);
+			if (newT > 0.0 && newT < bestT) {
+				bestT = newT;
+				bestBrdf = brdfs[i];
+				bestA = quadrics[2*i+1];
+				foundHit = true;
+			}
+		}
 		return foundHit;
+	}
+
+	vec4 shadeEnvironment(vec3 ray) {
+		vec3 mirrorSphereCoord = normalize(vec3(0.0,0.0,1.0) + normalize(ray)) / 2.0;
+		vec2 probeTex = vec2(mirrorSphereCoord.x, -1.0 * mirrorSphereCoord.y) + vec2(0.5, 0.5);
+		return texture2D(probeTexture, probeTex);
+	}
+
+	vec4 shadeMirror(vec3 worldPos, vec3 worldNormal) {
+		vec3 reflDir = rayDir;
+		vec3 reflPos = worldPos;
+		vec3 normal = worldNormal;
+		vec4 bestBrdf;
+		mat4 bestA;
+		float bestT;
+
+		for (int i = 0; i < 5; i++) {
+			reflDir = reflect(normalize(normalize(rayDir)), normalize(normal));
+			vec4 e = vec4(reflPos + normalize(reflDir) / 10.0, 1.0);
+			vec4 d = vec4(reflDir, 0.0);
+			if (!findBestHit(e, d, bestBrdf, bestA, bestT)) {
+				return shadeEnvironment(reflDir);
+			}
+			reflPos = (e + d * bestT).xyz;
+			normal = normalize((bestA * vec4(reflPos, 1.0) + vec4(reflPos, 1.0) * bestA).xyz);
+			if (bestBrdf.w == 0.0) {
+				return shadeBoard(reflPos, normal);
+			} else if (bestBrdf.w == 1.0) {
+				return shadeShiny(reflPos, normal);
+			} else if (bestBrdf.w == 2.0) {
+				return shadeDiffuse(reflPos, normal, vec3(0.8,0.8,0.8));
+			}
+		}
+		return shadeDiffuse(worldPos, worldNormal, vec3(0.8,0.8,0.8));
 	}
 
 	void main(void) {
@@ -218,11 +263,13 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 
 			} else if (bestBrdf.w == 1.0) {
 				gl_FragColor = shadeShiny(r.xyz, normal);
-			} else {
+			} else if (bestBrdf.w == 2.0) {
 				gl_FragColor = shadeDiffuse(r.xyz, normal, vec3(0.8,0.8,0.8));
+			} else {
+				gl_FragColor = shadeMirror(r.xyz, normal);
 			}
 		} else {
-			gl_FragColor = shadeEnvironment();
+			gl_FragColor = shadeEnvironment(rayDir);
 		}
 	}
 `;
