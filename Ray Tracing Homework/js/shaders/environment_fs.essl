@@ -211,6 +211,28 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 				foundHit = true;
 			}
 		}
+		// quadrics[34] should be hyperboloid of next rook
+
+		for (int i = 16; i < 18; i++) {
+			newT = intersectClippedQuadric(quadrics[2*i+2], quadrics[(2*i)+3], e, d);
+			if (newT > 0.0 && newT < bestT) {
+				bestT = newT;
+				bestBrdf = brdfs[i];
+				bestA = quadrics[2*i+2];
+				foundHit = true;
+			}
+		}
+
+		for (int i = 18; i < 19; i++) {
+			newT = intersectClippedQuadric(quadrics[2*i+2], quadrics[(2*i)+3], quadrics[2*i+4], e, d);
+			if (newT > 0.0 && newT < bestT) {
+				bestT = newT;
+				bestBrdf = vec4(0,0,0,3);
+				bestA = quadrics[2*i+2];
+				foundHit = true;
+			}
+		}
+
 		return foundHit;
 	}
 
