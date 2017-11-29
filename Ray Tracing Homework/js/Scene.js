@@ -36,6 +36,7 @@ let Scene = function(gl) {
   let leftRook = new Rook(13,27,7,0);
   let rightRook = new Rook(16,34,7,7);
   let king = new King(19,41,7,4);
+  let queen = new Queen(26,55,7,3);
 
   this.camera = new PerspectiveCamera();
   this.camera.position = new Vec3(0,1,0);

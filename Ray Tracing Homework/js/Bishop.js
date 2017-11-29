@@ -22,16 +22,16 @@ let Bishop = function(brdfStartIndex, quadricStartIndex, row, col, lightIndex) {
   // commit materials
   Material.quadrics.at(quadricStartIndex).set(hyperboloid.surfaceCoeffMatrix);
   Material.quadrics.at(quadricStartIndex + 1).set(hyperboloid.clipperCoeffMatrix);
-  Material.brdfs.at(brdfStartIndex).set(new Vec4(0,0,0,2));
+  Material.brdfs.at(brdfStartIndex).set(new Vec4(0.8,0.8,0.8,2));
   Material.quadrics.at(quadricStartIndex + 2).set(head.surfaceCoeffMatrix);
   Material.quadrics.at(quadricStartIndex + 3).set(head.clipperCoeffMatrix);
-  Material.brdfs.at(brdfStartIndex + 1).set(new Vec4(0,0,0,2));
+  Material.brdfs.at(brdfStartIndex + 1).set(new Vec4(0.8,0.8,0.8,2));
   Material.quadrics.at(quadricStartIndex + 4).set(hole.surfaceCoeffMatrix);
   Material.quadrics.at(quadricStartIndex + 5).set(hole.clipperCoeffMatrix);
-  Material.brdfs.at(brdfStartIndex + 2).set(new Vec4(0,0,0,2));
+  Material.brdfs.at(brdfStartIndex + 2).set(new Vec4(0.8,0.8,0.8,2));
   Material.quadrics.at(quadricStartIndex + 6).set(hat.surfaceCoeffMatrix);
   Material.quadrics.at(quadricStartIndex + 7).set(hat.clipperCoeffMatrix);
-  Material.brdfs.at(brdfStartIndex + 3).set(new Vec4(0,0,0,2));
+  Material.brdfs.at(brdfStartIndex + 3).set(new Vec4(0.8,0.8,0.8,2));
 
   Material.lightPos.at(lightIndex).set(new Vec4(-3.5 + col,1.5,3.5 - row,1));
   Material.lightPowerDensity.at(lightIndex).set(new Vec3(5,5,5));
