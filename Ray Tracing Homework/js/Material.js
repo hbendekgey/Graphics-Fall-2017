@@ -54,4 +54,4 @@ Object.defineProperty(Material, "rayDirMatrix", {value: new Mat4()} );
 Object.defineProperty(Material, "modelMatrixInverse", {value: new Mat4()} );
 Object.defineProperty(Material, "modelViewProjMatrix", {value: new Mat4()} );
 Object.defineProperty(Material, "quadrics", {value: new Mat4Array(60)} ); // 15
-Object.defineProperty(Material, "brdfs", {value: new Vec4Array(20)} );
+Object.defineProperty(Material, "brdfs", {value: new Vec4Array(30)} );

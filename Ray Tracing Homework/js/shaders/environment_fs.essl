@@ -10,7 +10,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	uniform vec4 lightPos[3];
 	uniform vec3 lightPowerDensity[3];
 	uniform mat4 quadrics[60];
-	uniform vec4 brdfs[20];
+	uniform vec4 brdfs[30];
 
 
 	float intersectClippedQuadric(mat4 A, mat4 B, vec4 e, vec4 d) {
@@ -136,6 +136,35 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 				return true;
 			}
 		}
+
+		for (int i = 15; i < 16; i++) {
+			t = intersectClippedQuadric(quadrics[2*i+1], quadrics[(2*i)+2], quadrics[(2*i)+3], e + (normalize(vec4(d.xyz,0.0)) / 10.0), vec4(d.xyz,0.0));
+			if (t > 0.00 && (t < 1.0 || d.w == 0.0)) {
+				return true;
+			}
+		}
+
+		for (int i = 16; i < 18; i++) {
+			t = intersectClippedQuadric(quadrics[2*i+2], quadrics[(2*i)+3], e + (normalize(vec4(d.xyz,0.0)) / 10.0), vec4(d.xyz,0.0));
+			if (t > 0.00 && (t < 1.0 || d.w == 0.0)) {
+				return true;
+			}
+		}
+
+		for (int i = 18; i < 19; i++) {
+			t = intersectClippedQuadric(quadrics[2*i+2], quadrics[(2*i)+3], quadrics[(2*i)+4], e + (normalize(vec4(d.xyz,0.0)) / 10.0), vec4(d.xyz,0.0));
+			if (t > 0.00 && (t < 1.0 || d.w == 0.0)) {
+				return true;
+			}
+		}
+
+		for (int i = 19; i < 26; i++) {
+			t = intersectClippedQuadric(quadrics[2*i+3], quadrics[(2*i)+4], e + (normalize(vec4(d.xyz,0.0)) / 10.0), vec4(d.xyz,0.0));
+			if (t > 0.00 && (t < 1.0 || d.w == 0.0)) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -211,7 +240,6 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 				foundHit = true;
 			}
 		}
-		// quadrics[34] should be hyperboloid of next rook
 
 		for (int i = 16; i < 18; i++) {
 			newT = intersectClippedQuadric(quadrics[2*i+2], quadrics[(2*i)+3], e, d);
@@ -227,8 +255,18 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 			newT = intersectClippedQuadric(quadrics[2*i+2], quadrics[(2*i)+3], quadrics[2*i+4], e, d);
 			if (newT > 0.0 && newT < bestT) {
 				bestT = newT;
-				bestBrdf = vec4(0,0,0,3);
+				bestBrdf = brdfs[i];
 				bestA = quadrics[2*i+2];
+				foundHit = true;
+			}
+		}
+
+		for (int i = 19; i < 26; i++) {
+			newT = intersectClippedQuadric(quadrics[2*i+3], quadrics[(2*i)+4], e, d);
+			if (newT > 0.0 && newT < bestT) {
+				bestT = newT;
+				bestBrdf = brdfs[i];
+				bestA = quadrics[2*i+3];
 				foundHit = true;
 			}
 		}
@@ -243,6 +281,7 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 	}
 
 	vec4 shadeMirror(vec3 worldPos, vec3 worldNormal) {
+		vec3 reflectance = vec3(1.0,1.0,1.0);
 		vec3 reflDir = rayDir;
 		vec3 reflPos = worldPos;
 		vec3 normal = worldNormal;
@@ -265,10 +304,21 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 				return shadeShiny(reflPos, normal);
 			} else if (bestBrdf.w == 2.0) {
 				return shadeDiffuse(reflPos, normal, vec3(0.8,0.8,0.8));
+			} else if (bestBrdf.w == 4.0) {
+				float alpha = dot(-reflDir, normal);
+				reflectance = reflectance * (bestBrdf.xyz + (vec3(1.0,1.0,1.0) - bestBrdf.xyz) * (1.0 - cos(pow(alpha, 5.0))));
 			}
 		}
-		return shadeDiffuse(worldPos, worldNormal, vec3(0.8,0.8,0.8));
+		return vec4(reflectance, 1.0) * shadeDiffuse(worldPos, worldNormal, vec3(0.8,0.8,0.8));
 	}
+
+
+	vec4 shadeGold(vec3 worldPos, vec3 worldNormal, vec3 r0) {
+		float alpha = dot(-rayDir, worldNormal);
+		vec3 reflectance = r0 + (vec3(1.0,1.0,1.0) - r0) * (1.0 - cos(pow(alpha, 5.0)));
+		return vec4(reflectance, 1.0) * shadeMirror(worldPos, worldNormal);
+	}
+
 
 	void main(void) {
 		vec4 e = vec4(cameraPos, 1.0);
@@ -287,8 +337,10 @@ Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `
 				gl_FragColor = shadeShiny(r.xyz, normal);
 			} else if (bestBrdf.w == 2.0) {
 				gl_FragColor = shadeDiffuse(r.xyz, normal, vec3(0.8,0.8,0.8));
-			} else {
+			} else if (bestBrdf.w == 3.0) {
 				gl_FragColor = shadeMirror(r.xyz, normal);
+			} else {
+				gl_FragColor = shadeGold(r.xyz, normal, bestBrdf.xyz);
 			}
 		} else {
 			gl_FragColor = shadeEnvironment(rayDir);
