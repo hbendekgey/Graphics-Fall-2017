@@ -1,10 +1,10 @@
 "use strict";
 let Scene = function(gl) {
   this.vsTrafo = new Shader(gl, gl.VERTEX_SHADER, "trafo_vs.essl");
-  this.vsBackground = new Shader(gl, gl.VERTEX_SHADER, "background_vs.essl");  
+  this.vsBackground = new Shader(gl, gl.VERTEX_SHADER, "background_vs.essl");
   this.fsTextured = new Shader(gl, gl.FRAGMENT_SHADER, "textured_fs.essl");
   this.texturedProgram = new TexturedProgram(gl, this.vsTrafo, this.fsTextured);
-  this.backgroundProgram = new TexturedProgram(gl, this.vsBackground, this.fsTextured);  
+  this.backgroundProgram = new TexturedProgram(gl, this.vsBackground, this.fsTextured);
 
   this.quadGeometry = new TexturedQuadGeometry(gl);
 
@@ -32,14 +32,13 @@ let Scene = function(gl) {
     this.orientation += dt * this.angularMomentum * this.invAngularMass;
     this.position.add(this.momentum.times(dt * this.invAngularMass));
     this.angularMomentum *= Math.pow(this.angularDrag, dt);
-    this.momentum.mul(Math.pow(this.backDrag, dt));
   };
 
-  let circularMove = function(t,dt){
-    let mt = t * this.angularMomentum * this.invAngularMass;
-    this.position = this.staticPosition.plus(new Vec3(Math.cos(mt), Math.sin(mt), 0));
-    this.orientation = mt % (2 * Math.PI);
-  }
+  // let circularMove = function(t,dt){
+  //   let mt = t * this.angularMomentum * this.invAngularMass;
+  //   this.position = this.staticPosition.plus(new Vec3(Math.cos(mt), Math.sin(mt), 0));
+  //   this.orientation = mt % (2 * Math.PI);
+  // }
 
   for(var i=0; i < 64; i++){
     let asteroid = new GameObject( this.asteroidMesh );
@@ -52,8 +51,8 @@ let Scene = function(gl) {
     asteroid.move = genericMove;
   }
 
-  this.avatar.backDrag = 0.8;
-  this.avatar.sideDrag = 0.5;
+  this.avatar.backDrag = 0.95;
+  this.avatar.sideDrag = 0.2;
   this.avatar.angularDrag = 0.5;
   this.avatar.control = function(t, dt, keysPressed, gameObjects){
     this.torque = 0;
@@ -65,9 +64,14 @@ let Scene = function(gl) {
     }
     let thrust = 0;
     if (keysPressed.UP) {
-      thrust = 2;
+      thrust = 10;
     }
     let ahead = new Vec3(Math.cos(this.orientation),Math.sin(this.orientation),0);
+    let momAhead = ahead.times(ahead.dot(this.momentum));
+    let momSide = this.momentum.minus(momAhead);
+    this.momentum.set()
+                 .addScaled(Math.pow(this.backDrag, dt), momAhead)
+                 .addScaled(Math.pow(this.sideDrag, dt), momSide);
     this.force = ahead.times(thrust);
   };
   this.avatar.move = genericMove;
