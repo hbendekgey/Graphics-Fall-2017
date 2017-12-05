@@ -27,9 +27,12 @@ let Scene = function(gl) {
   this.asteroidMesh = new Mesh(this.quadGeometry, this.asteroidMaterial);
 
   let genericMove = function(t, dt){
+    this.momentum.addScaled(dt, this.force);
+    this.angularMomentum += dt * this.torque;
     this.orientation += dt * this.angularMomentum * this.invAngularMass;
     this.position.add(this.momentum.times(dt * this.invAngularMass));
     this.angularMomentum *= Math.pow(this.angularDrag, dt);
+    this.momentum.mul(Math.pow(this.backDrag, dt));
   };
 
   let circularMove = function(t,dt){
@@ -42,22 +45,31 @@ let Scene = function(gl) {
     let asteroid = new GameObject( this.asteroidMesh );
     asteroid.position.setRandom(new Vec3(-12, -12, 0.5), new Vec3(12, 12, 0.5) );
     asteroid.momentum.setRandom(new Vec3(-2, -2, 0), new Vec3(2, 2, 0));
-    asteroid.angularMomentum = (Math.random() - 0.5) * 100.0;
+    asteroid.angularMomentum = (Math.random() - 0.5) * 10.0;
     this.gameObjects.push(asteroid);
     //asteroid.staticPosition = asteroid.position;
-    asteroid.angularDrag = 0.8;
+    //asteroid.angularDrag = 0.8;
     asteroid.move = genericMove;
   }
 
-  this.avatar.backDrag = 0.9;
+  this.avatar.backDrag = 0.8;
   this.avatar.sideDrag = 0.5;
   this.avatar.angularDrag = 0.5;
   this.avatar.control = function(t, dt, keysPressed, gameObjects){
-    // PRACTICAL TODO
-    let thrust = 0;
-    //this.force = ahead.times(this.thrust); 
     this.torque = 0;
-  };  
+    if (keysPressed.LEFT) {
+      this.torque += 1;
+    }
+    if (keysPressed.RIGHT) {
+      this.torque -= 1;
+    }
+    let thrust = 0;
+    if (keysPressed.UP) {
+      thrust = 2;
+    }
+    let ahead = new Vec3(Math.cos(this.orientation),Math.sin(this.orientation),0);
+    this.force = ahead.times(thrust);
+  };
   this.avatar.move = genericMove;
 
   this.camera = new OrthoCamera();
@@ -98,5 +110,3 @@ Scene.prototype.update = function(gl, keysPressed) {
   }
 
 };
-
-
