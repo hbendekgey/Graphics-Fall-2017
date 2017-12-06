@@ -41,12 +41,6 @@ App.prototype.registerEventHandlers = function() {
 		theApp.keysPressed[keyboardMap[event.keyCode]] = false;
 	};
 
-	this.canvas.onmousemove = function(event) {
-		var x = (event.clientX / theApp.canvas.clientWidth - 0.5) * 2;
-		var y = (event.clientY / theApp.canvas.clientHeight - 0.5) * -2;
-		var coordinates = new Vec4(x,y,0,1).times(theApp.scene.camera.viewProjMatrix.invert());
-		theApp.scene.camera.viewProjMatrix.invert();
-
 	window.addEventListener('resize', function() {
 		theApp.resize();
 	});

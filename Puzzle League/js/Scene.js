@@ -16,7 +16,7 @@ let Scene = function(gl) {
   this.gearGeometry = new GearGeometry(gl);
 
   this.camera = new OrthoCamera();
-  this.camera.position.add(new Vec3(0.9, 0.9, 0));
+  this.camera.position.add(new Vec3(1.5, 1.1, 0));
   this.camera.updateViewProjMatrix();
 
   this.gameObjects = [];
@@ -27,12 +27,15 @@ let Scene = function(gl) {
   this.selected = {};
   this.stableRotation = 0;
 
+  this.numCols = 6;
+  this.numRows = 12;
+
   this.cursorGeometry = new CursorGeometry(gl);
   this.cursor = new Cursor(this.cursorGeometry, this.staticMaterial, 5, 5);
-  for (var i = 0; i < 10; i++) {
+  for (var i = 0; i < this.numCols; i++) {
     this.gameObjects.push([]);
     this.gemsToFall.push([]);
-    for (var j = 0; j < 10; j++) {
+    for (var j = 0; j < this.numRows; j++) {
       this.gemsToFall[i].push(0);
       this.setNewGem(i,j);
       this.gemsToCheck.push(this.gameObjects[i][j]);
@@ -91,16 +94,16 @@ Scene.prototype.update = function(gl, keysPressed) {
       this.gameObjects[a.i][a.j].orientation += 0.15;
     } else if (index == 0) {
       this.gemsToFall[a.i].splice(a.j, 1);
-      this.gemsToFall[a.i].push(this.gemsToFall[a.i][8]); // top item needs to fall as much as the item below it
+      this.gemsToFall[a.i].push(this.gemsToFall[a.i][this.numRows-2]); // top item needs to fall as much as the item below it
       this.gameObjects[a.i].splice(a.j, 1);
-      this.setNewGem(a.i,9);
-      this.gameObjects[a.i][9].j++;
-      for (var fallIndex = a.j; fallIndex < 10; fallIndex++) {
+      this.setNewGem(a.i,this.numRows-1);
+      this.gameObjects[a.i][this.numRows-1].j++;
+      for (var fallIndex = a.j; fallIndex < this.numRows; fallIndex++) {
         this.gameObjects[a.i][fallIndex].j--;
         this.gemsToFall[a.i][fallIndex]++;
       }
-      this.setLocation(a.i,9);
-      this.gameObjects[a.i][9].position.addScaled(this.gemsToFall[a.i][9], new Vec3(0, 0.2, 0));
+      this.setLocation(a.i,this.numRows-1);
+      this.gameObjects[a.i][this.numRows-1].position.addScaled(this.gemsToFall[a.i][this.numRows-1], new Vec3(0, 0.2, 0));
       this.gemsToRemove.shift();
       index--;
     }
@@ -169,7 +172,7 @@ Scene.prototype.checkForLine = function(i,j) {
   var inRow = 1;
   var colsToRemove = [];
   colsToRemove.push(i);
-  for(var index = i + 1; index < 10 && this.gameObjects[index][j].gemType == thisGemType; index++) {
+  for(var index = i + 1; index < this.numCols && this.gameObjects[index][j].gemType == thisGemType; index++) {
     inRow++;
     colsToRemove.push(index);
   }
@@ -180,7 +183,7 @@ Scene.prototype.checkForLine = function(i,j) {
   var inCol = 1;
   var rowsToRemove = [];
   rowsToRemove.push(j);
-  for(var index = j + 1; index < 10 && this.gameObjects[i][index].gemType == thisGemType; index++) {
+  for(var index = j + 1; index < this.numRows && this.gameObjects[i][index].gemType == thisGemType; index++) {
     inCol++;
     rowsToRemove.push(index);
   }
