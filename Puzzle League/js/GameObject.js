@@ -9,6 +9,9 @@ let GameObject = function(mesh, gemType, i, j) {
   this.j = j;
   this.modelMatrix = new Mat4();
   this.fallen = 0;
+  this.toCheck = true; // initialized to true for initial check
+  this.toRemove = false;
+  this.falling = false;
 };
 
 GameObject.prototype.updateModelMatrix =

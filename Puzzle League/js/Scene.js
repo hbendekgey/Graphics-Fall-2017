@@ -22,6 +22,7 @@ let Scene = function(gl) {
   this.gameObjects = [];
   this.gemsToCheck = [];
   this.gemsToRemove = [];
+  this.gemsToFall = [];
   this.timeAtLastFrame = new Date().getTime();
 
   this.numCols = 6;
@@ -61,6 +62,21 @@ Scene.prototype.setLocation = function(i,j) {
   this.gameObjects[i][j].position.set().addScaled(i, new Vec3(0.2, 0, 0)).addScaled(j, new Vec3(0, 0.2, 0));
 }
 
+Scene.prototype.shouldFall = function(i,j) {
+  return j > 0 && (!this.gameObjects[i][j-1].gemType || this.gameObjects[i][j-1].falling);
+}
+
+Scene.prototype.queueAboveToFall = function(i,j) {
+  for (var fallIndex = j+1; fallIndex < this.numRows &&
+                              this.gameObjects[i][fallIndex].gemType &&
+                              !this.gameObjects[i][fallIndex].falling &&
+                              !this.gameObjects[i][fallIndex].toRemove;
+                              fallIndex++) {
+    this.gameObjects[i][fallIndex].falling = true;
+    this.gemsToFall.push(this.gameObjects[i][fallIndex])
+  }
+}
+
 Scene.prototype.update = function(gl, keysPressed) {
 
   //jshint bitwise:false
@@ -92,46 +108,51 @@ Scene.prototype.update = function(gl, keysPressed) {
       this.gameObjects[a.i][a.j].orientation += 0.15;
     } else if (index == 0) {
       this.gameObjects[a.i][a.j] = this.emptyGem;
+      this.queueAboveToFall(a.i,a.j);
       this.gemsToRemove.shift();
       index--;
     }
   }
 
-  // count the number of falling gems and make them fall
-  var gemsFalling = false;
+  // for all falling gems...
   var fallingSpeed = 0.01;
-  for (var i = 0; i < this.gameObjects.length; i++) {
-    for (var j = 0; j < this.gameObjects[i].length - 1; j++) {
-      if (!this.gameObjects[i][j].gemType && this.gameObjects[i][j+1].gemType) {
-        // if there's a non-empty gem above an empty gem, make it and everything above it fall
-        for (var fallIndex = j+1; fallIndex < this.numRows && this.gameObjects[i][fallIndex].gemType; fallIndex++) {
-          if (this.gameObjects[i][fallIndex].fallen < 0.2) { // and it hasn't fallen .2 yet...
-            gemsFalling = true;
-            this.gameObjects[i][fallIndex].position.sub(new Vec3(0, fallingSpeed, 0));
-            this.gameObjects[i][fallIndex].fallen += fallingSpeed;
-          } else {
-            this.gameObjects[i][fallIndex-1] = this.gameObjects[i][fallIndex];
-            this.gameObjects[i][fallIndex] = this.emptyGem;
-            this.setLocation(i,fallIndex-1);
-            this.gameObjects[i][fallIndex-1].fallen = 0;
-            if (this.gameObjects[i][fallIndex-1].gemType && !this.gemsToCheck.includes(this.gameObjects[i][fallIndex-1])) {
-              this.gemsToCheck.push(this.gameObjects[i][fallIndex-1]);
-            }
-          }
+  for (var index = 0; index < this.gemsToFall.length; index++) {
+    let a = this.gemsToFall[index];
+    if (this.gameObjects[a.i][a.j].fallen < 0.2) { // if they haven't fallen .2 yet...
+      this.gameObjects[a.i][a.j].position.sub(new Vec3(0, fallingSpeed, 0));
+      this.gameObjects[a.i][a.j].fallen += fallingSpeed;
+    } else {
+      // set this into the new position
+      this.gameObjects[a.i][a.j-1] = this.gameObjects[a.i][a.j];
+      this.gameObjects[a.i][a.j] = this.emptyGem;
+      this.gameObjects[a.i][a.j-1].fallen = 0;
+      this.setLocation(a.i,a.j-1); // this updates a.j <- a.j - 1 and puts it in correct place
+      if (!this.shouldFall(a.i,a.j)) {
+        this.gameObjects[a.i][a.j].falling = false;
+        if (this.gameObjects[a.i][a.j].gemType && !this.gameObjects[a.i][a.j].toCheck) {
+          this.gemsToCheck.push(this.gameObjects[a.i][a.j]);
+          this.gameObjects[a.i][a.j].toCheck = true;
         }
+        this.gemsToFall.splice(index, 1);
+        index--;
       }
     }
   }
 
+  if (keysPressed.SHIFT) {
+    console.log(this.shouldFall(this.cursor.i,this.cursor.j));
+    console.log(this.gameObjects[this.cursor.i][this.cursor.j].falling);
+    console.log(this.gameObjects[this.cursor.i][this.cursor.j].fallen);
+  }
+
   // if there are no shrinking or falling gems, check gems that have been moved recently
-  if (!this.gemsToRemove.length && !gemsFalling) {
-    if (!this.gemsToCheck.length) {
-      this.disableListeners = false;
-    }
-    while(this.gemsToCheck.length > 0) {
-      this.checkForLine(this.gemsToCheck[0].i,this.gemsToCheck[0].j);
-      this.gemsToCheck.shift();
-    }
+  if (!this.gemsToCheck.length) {
+    this.disableListeners = false;
+  }
+  while(this.gemsToCheck.length > 0) {
+    this.gemsToCheck[0].toCheck = false;
+    this.checkForLine(this.gemsToCheck[0].i,this.gemsToCheck[0].j);
+    this.gemsToCheck.shift();
   }
 
   // move the cursor
@@ -170,6 +191,8 @@ Scene.prototype.checkForLine = function(i,j) {
   colsToRemove.push(i);
   for(var index = i + 1; index < this.numCols &&
                         this.gameObjects[index][j].gemType &&
+                        !this.gameObjects[i][index].falling &&
+                        !this.gameObjects[i][index].toRemove &&
                         this.gameObjects[index][j].gemType == thisGemType;
                         index++) {
     inRow++;
@@ -177,6 +200,8 @@ Scene.prototype.checkForLine = function(i,j) {
   }
   for(var index = i - 1; index >= 0 &&
                          this.gameObjects[index][j].gemType &&
+                         !this.gameObjects[i][index].falling &&
+                         !this.gameObjects[i][index].toRemove &&
                          this.gameObjects[index][j].gemType == thisGemType;
                          index--) {
     inRow++;
@@ -187,6 +212,8 @@ Scene.prototype.checkForLine = function(i,j) {
   rowsToRemove.push(j);
   for(var index = j + 1; index < this.numRows &&
                          this.gameObjects[i][index].gemType &&
+                         !this.gameObjects[i][index].falling &&
+                         !this.gameObjects[i][index].toRemove &&
                          this.gameObjects[i][index].gemType == thisGemType;
                          index++) {
     inCol++;
@@ -194,6 +221,8 @@ Scene.prototype.checkForLine = function(i,j) {
   }
   for(var index = j - 1; index >= 0 &&
                          this.gameObjects[i][index].gemType &&
+                         !this.gameObjects[i][index].falling &&
+                         !this.gameObjects[i][index].toRemove &&
                          this.gameObjects[i][index].gemType == thisGemType;
                          index--) {
     inCol++;
@@ -201,15 +230,17 @@ Scene.prototype.checkForLine = function(i,j) {
   }
   if(inRow >= 3) {
     for (var index = 0; index < colsToRemove.length; index++) {
-      if (!this.gemsToRemove.includes(this.gameObjects[colsToRemove[index]][j])) {
+      if (!this.gameObjects[colsToRemove[index]][j].toRemove && !this.gameObjects[colsToRemove[index]][j].falling) {
         this.gemsToRemove.push(this.gameObjects[colsToRemove[index]][j]);
+        this.gameObjects[colsToRemove[index]][j].toRemove = true;
       }
     }
   }
   if(inCol >= 3) {
     for (var index = 0; index < rowsToRemove.length; index++) {
-      if (!this.gemsToRemove.includes(this.gameObjects[i][rowsToRemove[index]])) {
+      if (!this.gameObjects[i][rowsToRemove[index]].toRemove && !this.gameObjects[i][rowsToRemove[index]].toRemove) {
         this.gemsToRemove.push(this.gameObjects[i][rowsToRemove[index]]);
+        this.gameObjects[i][rowsToRemove[index]].toRemove = true;
       }
     }
   }
@@ -223,6 +254,14 @@ Scene.prototype.swap = function() {
   let temp = this.gameObjects[leftI][j];
   this.gameObjects[leftI][j] = this.gameObjects[rightI][j];
   this.gameObjects[rightI][j] = temp;
+  if (this.shouldFall(leftI,j)) {
+    this.gameObjects[leftI][j].falling = true;
+    this.gemsToFall.push(this.gameObjects[leftI][j])
+  }
+  if (this.shouldFall(rightI,j)) {
+    this.gameObjects[rightI][j].falling = true;
+    this.gemsToFall.push(this.gameObjects[rightI][j])
+  }
   this.setLocation(leftI, j);
   this.setLocation(rightI, j);
   this.checkForLine(leftI,j);
