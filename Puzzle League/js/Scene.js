@@ -3,7 +3,7 @@ let Scene = function(gl) {
   this.vsGem = new Shader(gl, gl.VERTEX_SHADER, "gem_vs.essl");
   this.fsGem = new Shader(gl, gl.FRAGMENT_SHADER, "gem_fs.essl");
   this.gemProgram = new Program(gl, this.vsGem, this.fsGem);
-  
+
   this.heartMaterial = new Material(gl, this.gemProgram);
   this.heartMaterial.time.set(0);
   this.staticMaterial = new Material(gl, this.gemProgram);
@@ -13,7 +13,6 @@ let Scene = function(gl) {
   this.heartGeometry = new HeartGeometry(gl);
   this.crossGeometry = new CrossGeometry(gl);
   this.diamondGeometry = new DiamondGeometry(gl);
-  this.triangleGeometry = new TriangleGeometry(gl);
   this.gearGeometry = new GearGeometry(gl);
 
   this.camera = new OrthoCamera();
@@ -28,6 +27,8 @@ let Scene = function(gl) {
   this.selected = {};
   this.stableRotation = 0;
 
+  this.cursorGeometry = new CursorGeometry(gl);
+  this.cursor = new Cursor(this.cursorGeometry, this.staticMaterial, 5, 5);
   for (var i = 0; i < 10; i++) {
     this.gameObjects.push([]);
     this.gemsToFall.push([]);
@@ -40,23 +41,22 @@ let Scene = function(gl) {
 };
 
 Scene.prototype.setNewGem = function(i, j) {
-  var gemTypeIndex = Math.floor(Math.random() * 6);
-  if (gemTypeIndex == 5) {
+  var gemTypeIndex = Math.floor(Math.random() * 5);
+  if (gemTypeIndex == 4) {
     this.gameObjects[i][j] = new GameObject(new Mesh(this.diamondGeometry, this.staticMaterial), "Diamond", i, j);
-  } else if (gemTypeIndex == 4) {
-    this.gameObjects[i][j] = new GameObject(new Mesh(this.crossGeometry, this.staticMaterial), "Cross", i, j);
   } else if (gemTypeIndex == 3) {
-    this.gameObjects[i][j] = new GameObject(new Mesh(this.heartGeometry, this.heartMaterial), "Heart", i, j);
+    this.gameObjects[i][j] = new GameObject(new Mesh(this.crossGeometry, this.staticMaterial), "Cross", i, j);
   } else if (gemTypeIndex == 2) {
-    this.gameObjects[i][j] = new GameObject(new Mesh(this.starGeometry, this.staticMaterial), "Star", i, j);
+    this.gameObjects[i][j] = new GameObject(new Mesh(this.heartGeometry, this.heartMaterial), "Heart", i, j);
   } else if (gemTypeIndex == 1) {
-    this.gameObjects[i][j] = new GameObject(new Mesh(this.triangleGeometry, this.staticMaterial), "Triangle", i, j);
+    this.gameObjects[i][j] = new GameObject(new Mesh(this.starGeometry, this.staticMaterial), "Star", i, j);
   } else {
     this.gameObjects[i][j] = new GameObject(new Mesh(this.gearGeometry, this.staticMaterial), "Gear", i, j);
   }
   this.setLocation(i,j);
 }
 
+// i represents the col, j represents the row
 Scene.prototype.setLocation = function(i,j) {
   this.gameObjects[i][j].i = i;
   this.gameObjects[i][j].j = j;
@@ -74,14 +74,8 @@ Scene.prototype.update = function(gl, keysPressed) {
 
   // clear the screen
   gl.clearColor(0.2, 0, 0.2, 1.0);
-  gl.clearDepth(0.5);
+  gl.clearDepth(0);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  // if quaking, rotate the screen
-  if (this.quake) {
-    this.camera.rotation = this.stableRotation + Math.cos(timeAtThisFrame / 100.0) / 15;
-    this.camera.updateViewProjMatrix();
-  }
 
   // if there are gems to remove, disable player interactions
   if (this.gemsToRemove.length) {
@@ -97,7 +91,7 @@ Scene.prototype.update = function(gl, keysPressed) {
       this.gameObjects[a.i][a.j].orientation += 0.15;
     } else if (index == 0) {
       this.gemsToFall[a.i].splice(a.j, 1);
-      this.gemsToFall[a.i].push(this.gemsToFall[a.i][8]);
+      this.gemsToFall[a.i].push(this.gemsToFall[a.i][8]); // top item needs to fall as much as the item below it
       this.gameObjects[a.i].splice(a.j, 1);
       this.setNewGem(a.i,9);
       this.gameObjects[a.i][9].j++;
@@ -118,21 +112,22 @@ Scene.prototype.update = function(gl, keysPressed) {
   for (var i = 0; i < this.gemsToFall.length; i++) {
     for (var j = 0; j < this.gemsToFall[i].length; j++) {
       if (this.gemsToFall[i][j] > 0) {
-        if (this.gemsToFall[i][j] <= 5 * fallingSpeed && !this.gemsToCheck.includes(this.gameObjects[i][j])) {
-            this.setLocation(i,j);
-            this.gemsToCheck.push(this.gameObjects[i][j]);
-        }
         fallingGems++;
         this.gameObjects[i][j].position.sub(new Vec3(0, fallingSpeed, 0));
         this.gemsToFall[i][j] -= 5 * fallingSpeed;
-      } 
+        if (this.gemsToFall[i][j] <= 5 * fallingSpeed && !this.gemsToCheck.includes(this.gameObjects[i][j])) {
+            this.setLocation(i,j);
+            this.gemsToFall[i][j] = 0;
+            this.gemsToCheck.push(this.gameObjects[i][j]);
+        }
+      }
     }
   }
 
   // if there are no shrinking or falling gems, check gems that have been moved recently
   if (!this.gemsToRemove.length && !fallingGems) {
     if (!this.gemsToCheck.length) {
-      this.disableListeners = false;      
+      this.disableListeners = false;
     }
     while(this.gemsToCheck.length > 0) {
       this.checkForLine(this.gemsToCheck[0].i,this.gemsToCheck[0].j);
@@ -140,20 +135,33 @@ Scene.prototype.update = function(gl, keysPressed) {
     }
   }
 
+  // move the cursor
+  let dx = 0;
+  let dy = 0;
+  if (keysPressed.UP) {
+    dy += 1;
+  }
+  if (keysPressed.DOWN) {
+    dy -= 1;
+  }
+  if (keysPressed.RIGHT) {
+    dx += 1;
+  }
+  if (keysPressed.LEFT) {
+    dx -= 1;
+  }
+  if (dx != 0 || dy != 0) {
+    this.cursor.move(dx, dy, timeAtThisFrame);
+  }
+
   // draw all gems, rotating the gears and deleting some if quaking
   for (var i = 0; i < this.gameObjects.length; i++) {
     for (var j = 0; j < this.gameObjects[i].length; j++) {
-      if (this.gameObjects[i][j].gemType == "Gear") {
-        this.gameObjects[i][j].orientation += dt;
-      }
-      if (this.quake && Math.random() > 0.999) {
-        if (!this.gemsToRemove.includes(this.gameObjects[i][j])) {
-          this.gemsToRemove.push(this.gameObjects[i][j]);
-        }
-      }
       this.gameObjects[i][j].draw(this.camera);
     }
   }
+
+  this.cursor.draw(this.camera, timeAtThisFrame);
 };
 
 Scene.prototype.checkForLine = function(i,j) {
@@ -197,66 +205,15 @@ Scene.prototype.checkForLine = function(i,j) {
   return (inRow >= 3 || inCol >= 3);
 }
 
-Scene.prototype.pickupGem = function(x,y) {
-  let i = Math.floor(5 * x + .5);
-  let j = Math.floor(5 * y + .5);
-  if (i >= 0 && i < 10 && j >= 0 && j < 10) {
-    this.selected.Gem = this.gameObjects[i][j];
-    this.selected.i = i;
-    this.selected.j = j;
-    this.currentPosition = new Vec3(x,y,0);
-  } else {
-    this.selected.Gem = null;
-  }
-}
-
-Scene.prototype.dragGem = function(x,y) {
-  if(this.selected.Gem) {
-    this.selected.Gem.position.sub(this.currentPosition).add(new Vec3(x,y,0));
-  }
-  this.currentPosition = new Vec3(x,y,0);
-}
-
-Scene.prototype.dropGem = function(x,y) {
-  if (this.selected.Gem) {
-  let i = Math.floor(5 * x + .5);
-  let j = Math.floor(5 * y + .5);
-  if (i >= 0 && i < 10 && j >= 0 && j < 10) {
-    if ((Math.abs(i - this.selected.i) == 1 && j == this.selected.j) || 
-        (i == this.selected.i && Math.abs(j - this.selected.j) == 1)) {
-      this.gameObjects[this.selected.i][this.selected.j] = this.gameObjects[i][j];
-      this.gameObjects[i][j] = this.selected.Gem;
-      let draggedGemFormLine = this.checkForLine(i,j);
-      let destinationGemFormLine = this.checkForLine(this.selected.i,this.selected.j)
-      if (!draggedGemFormLine && !destinationGemFormLine) {
-        this.gameObjects[i][j] = this.gameObjects[this.selected.i][this.selected.j];
-        this.gameObjects[this.selected.i][this.selected.j] = this.selected.Gem;
-      }
-      this.setLocation(i, j);
-    }
-  }
-  this.setLocation(this.selected.i, this.selected.j);
-  }
-}
-
-Scene.prototype.bomb = function(x,y) {
-  let i = Math.floor(5 * x + .5);
-  let j = Math.floor(5 * y + .5);
-  if (i >= 0 && i < 10 && j >= 0 && j < 10) {
-    if (!this.gemsToRemove.includes(this.gameObjects[i][j])) {
-      this.gemsToRemove.push(this.gameObjects[i][j]);
-    }
-  }
-}
-
-Scene.prototype.rotateRight = function() {
-  this.camera.rotation += Math.PI/2;
-  this.stableRotation += Math.PI/2;
-  this.camera.updateViewProjMatrix();
-}
-
-Scene.prototype.rotateLeft = function() {
-  this.camera.rotation -= Math.PI/2;
-  this.stableRotation -= Math.PI/2;
-  this.camera.updateViewProjMatrix();
+Scene.prototype.swap = function() {
+  let leftI = this.cursor.i;
+  let rightI = this.cursor.i+1;
+  let j = this.cursor.j;
+  let temp = this.gameObjects[leftI][j];
+  this.gameObjects[leftI][j] = this.gameObjects[rightI][j];
+  this.gameObjects[rightI][j] = temp;
+  this.setLocation(leftI, j);
+  this.setLocation(rightI, j);
+  this.checkForLine(leftI,j);
+  this.checkForLine(rightI,j)
 }

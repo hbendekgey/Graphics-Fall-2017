@@ -28,73 +28,25 @@ App.prototype.resize = function() {
 
 App.prototype.registerEventHandlers = function() {
 	let theApp = this;
+
 	document.onkeydown = function(event) {
-		if (keyboardMap[event.keyCode] == 'Q') {
-			if (theApp.mouseDown) {
-				theApp.scene.dropGem(0,0);
-			}
-			theApp.mouseDown = false;
-			theApp.scene.quake = true;
-		} else if (!theApp.scene.disableListeners && !theApp.scene.quake && keyboardMap[event.keyCode] == 'A') {
-			theApp.scene.rotateRight();
-		} else if (!theApp.scene.disableListeners && !theApp.scene.quake && keyboardMap[event.keyCode] == 'D') {
-			theApp.scene.rotateLeft();
-		} else {
-			theApp.keysPressed[keyboardMap[event.keyCode]] = true;
+		if (keyboardMap[event.keyCode] == "SPACE") {
+			theApp.scene.swap();
 		}
+		theApp.keysPressed[keyboardMap[event.keyCode]] = true;
 	};
+
 	document.onkeyup = function(event) {
-		if (keyboardMap[event.keyCode] == 'Q') {
-			theApp.scene.quake = false;
-			theApp.scene.camera.rotation = theApp.scene.stableRotation;
-			theApp.scene.camera.updateViewProjMatrix();
-		} else {
-			theApp.keysPressed[keyboardMap[event.keyCode]] = false;
-		}
+		theApp.scene.cursor.resetTimer();
+		theApp.keysPressed[keyboardMap[event.keyCode]] = false;
 	};
-	this.canvas.onmousedown = function(event) {
-		if (!theApp.scene.disableListeners && !theApp.scene.quake) {
-			var x = (event.clientX / theApp.canvas.clientWidth - 0.5) * 2;
-			var y = (event.clientY / theApp.canvas.clientHeight - 0.5) * -2;
-			var coordinates = new Vec4(x,y,0,1).times(new Mat4(theApp.scene.camera.viewProjMatrix).invert());
-			if (theApp.keysPressed.B) {
-				theApp.scene.bomb(coordinates.x, coordinates.y);
-			} else {
-		 		theApp.scene.pickupGem(coordinates.x,coordinates.y);
-		 		theApp.mouseDown = true;
-			}
-		}
-	};
+
 	this.canvas.onmousemove = function(event) {
 		var x = (event.clientX / theApp.canvas.clientWidth - 0.5) * 2;
 		var y = (event.clientY / theApp.canvas.clientHeight - 0.5) * -2;
 		var coordinates = new Vec4(x,y,0,1).times(theApp.scene.camera.viewProjMatrix.invert());
 		theApp.scene.camera.viewProjMatrix.invert();
 
-		//jshint unused:false
-		if (theApp.mouseDown) {
-			theApp.scene.dragGem(coordinates.x,coordinates.y);
-		}
-		event.stopPropagation();
-	};
-	this.canvas.onmouseout = function(event) {
-		//jshint unused:false
-		if (theApp.mouseDown) {
-			theApp.scene.dropGem(0,0);
-		}
-		theApp.mouseDown = false;
-	};
-	this.canvas.onmouseup = function(event) {
-		var x = (event.clientX / theApp.canvas.clientWidth - 0.5) * 2;
-		var y = (event.clientY / theApp.canvas.clientHeight - 0.5) * -2;
-		var coordinates = new Vec4(x,y,0,1).times(theApp.scene.camera.viewProjMatrix.invert());
-		theApp.scene.camera.viewProjMatrix.invert();
-
-		if (theApp.mouseDown) {
-			theApp.scene.dropGem(coordinates.x,coordinates.y);
-		}
-		theApp.mouseDown = false;
-	};
 	window.addEventListener('resize', function() {
 		theApp.resize();
 	});
