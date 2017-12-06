@@ -34,20 +34,12 @@ let Scene = function(gl) {
     this.angularMomentum *= Math.pow(this.angularDrag, dt);
   };
 
-  // let circularMove = function(t,dt){
-  //   let mt = t * this.angularMomentum * this.invAngularMass;
-  //   this.position = this.staticPosition.plus(new Vec3(Math.cos(mt), Math.sin(mt), 0));
-  //   this.orientation = mt % (2 * Math.PI);
-  // }
-
   for(var i=0; i < 64; i++){
     let asteroid = new GameObject( this.asteroidMesh );
     asteroid.position.setRandom(new Vec3(-12, -12, 0.5), new Vec3(12, 12, 0.5) );
     asteroid.momentum.setRandom(new Vec3(-2, -2, 0), new Vec3(2, 2, 0));
     asteroid.angularMomentum = (Math.random() - 0.5) * 10.0;
     this.gameObjects.push(asteroid);
-    //asteroid.staticPosition = asteroid.position;
-    //asteroid.angularDrag = 0.8;
     asteroid.move = genericMove;
   }
 
