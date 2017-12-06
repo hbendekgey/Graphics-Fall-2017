@@ -22,10 +22,7 @@ let Scene = function(gl) {
   this.gameObjects = [];
   this.gemsToCheck = [];
   this.gemsToRemove = [];
-  this.gemsToFall = [];
   this.timeAtLastFrame = new Date().getTime();
-  this.selected = {};
-  this.stableRotation = 0;
 
   this.numCols = 6;
   this.numRows = 12;
@@ -34,9 +31,7 @@ let Scene = function(gl) {
   this.cursor = new Cursor(this.cursorGeometry, this.staticMaterial, 5, 5);
   for (var i = 0; i < this.numCols; i++) {
     this.gameObjects.push([]);
-    this.gemsToFall.push([]);
     for (var j = 0; j < this.numRows; j++) {
-      this.gemsToFall[i].push(0);
       this.setNewGem(i,j);
       this.gemsToCheck.push(this.gameObjects[i][j]);
     }
@@ -96,41 +91,40 @@ Scene.prototype.update = function(gl, keysPressed) {
       this.gameObjects[a.i][a.j].scale += -0.03;
       this.gameObjects[a.i][a.j].orientation += 0.15;
     } else if (index == 0) {
-      this.gemsToFall[a.i].splice(a.j, 1);
-      this.gemsToFall[a.i].push(0); // temporary; the top empty gem doesn't need to fall
-      this.gameObjects[a.i].splice(a.j, 1);
-      this.gameObjects[a.i].push(this.emptyGem);
-      for (var fallIndex = a.j; fallIndex < this.numRows; fallIndex++) {
-        this.gameObjects[a.i][fallIndex].j--;
-        this.gemsToFall[a.i][fallIndex]++;
-      }
+      this.gameObjects[a.i][a.j] = this.emptyGem;
       this.gemsToRemove.shift();
       index--;
     }
   }
 
   // count the number of falling gems and make them fall
-  var fallingGems = 0;
+  var gemsFalling = false;
   var fallingSpeed = 0.01;
-  for (var i = 0; i < this.gemsToFall.length; i++) {
-    for (var j = 0; j < this.gemsToFall[i].length; j++) {
-      if (this.gemsToFall[i][j] > 0) {
-        fallingGems++;
-        this.gameObjects[i][j].position.sub(new Vec3(0, fallingSpeed, 0));
-        this.gemsToFall[i][j] -= 5 * fallingSpeed;
-        if (this.gemsToFall[i][j] <= 5 * fallingSpeed) {
-            this.setLocation(i,j);
-            this.gemsToFall[i][j] = 0;
-            if (this.gameObjects[i][j] != this.emptyGem && !this.gemsToCheck.includes(this.gameObjects[i][j])) {
-              this.gemsToCheck.push(this.gameObjects[i][j]);
+  for (var i = 0; i < this.gameObjects.length; i++) {
+    for (var j = 0; j < this.gameObjects[i].length - 1; j++) {
+      if (!this.gameObjects[i][j].gemType && this.gameObjects[i][j+1].gemType) {
+        // if there's a non-empty gem above an empty gem, make it and everything above it fall
+        for (var fallIndex = j+1; fallIndex < this.numRows && this.gameObjects[i][fallIndex].gemType; fallIndex++) {
+          if (this.gameObjects[i][fallIndex].fallen < 0.2) { // and it hasn't fallen .2 yet...
+            gemsFalling = true;
+            this.gameObjects[i][fallIndex].position.sub(new Vec3(0, fallingSpeed, 0));
+            this.gameObjects[i][fallIndex].fallen += fallingSpeed;
+          } else {
+            this.gameObjects[i][fallIndex-1] = this.gameObjects[i][fallIndex];
+            this.gameObjects[i][fallIndex] = this.emptyGem;
+            this.setLocation(i,fallIndex-1);
+            this.gameObjects[i][fallIndex-1].fallen = 0;
+            if (this.gameObjects[i][fallIndex-1].gemType && !this.gemsToCheck.includes(this.gameObjects[i][fallIndex-1])) {
+              this.gemsToCheck.push(this.gameObjects[i][fallIndex-1]);
             }
+          }
         }
       }
     }
   }
 
   // if there are no shrinking or falling gems, check gems that have been moved recently
-  if (!this.gemsToRemove.length && !fallingGems) {
+  if (!this.gemsToRemove.length && !gemsFalling) {
     if (!this.gemsToCheck.length) {
       this.disableListeners = false;
     }
