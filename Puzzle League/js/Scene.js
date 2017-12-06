@@ -85,8 +85,11 @@ Scene.prototype.update = function(gl, keysPressed) {
     this.disableListeners = true;
   }
 
-  // if any gems are in set to be removed, slowly shrink and rotate them. If shrinking is done,
-  // set a new gem, and set all gems above to fall
+  this.emptyGem = new GameObject();
+  this.emptyGem.draw = () => {};
+
+  // if any gems are in set to be removed, slowly shrink and rotate them.
+  // If shrinking is done, set all gems above to fall
   for (var index = 0; index < this.gemsToRemove.length; index++) {
     let a = this.gemsToRemove[index];
     if (this.gameObjects[a.i][a.j].scale > 0.1) {
@@ -94,16 +97,13 @@ Scene.prototype.update = function(gl, keysPressed) {
       this.gameObjects[a.i][a.j].orientation += 0.15;
     } else if (index == 0) {
       this.gemsToFall[a.i].splice(a.j, 1);
-      this.gemsToFall[a.i].push(this.gemsToFall[a.i][this.numRows-2]); // top item needs to fall as much as the item below it
+      this.gemsToFall[a.i].push(0); // temporary; the top empty gem doesn't need to fall
       this.gameObjects[a.i].splice(a.j, 1);
-      this.setNewGem(a.i,this.numRows-1);
-      this.gameObjects[a.i][this.numRows-1].j++;
+      this.gameObjects[a.i].push(this.emptyGem);
       for (var fallIndex = a.j; fallIndex < this.numRows; fallIndex++) {
         this.gameObjects[a.i][fallIndex].j--;
         this.gemsToFall[a.i][fallIndex]++;
       }
-      this.setLocation(a.i,this.numRows-1);
-      this.gameObjects[a.i][this.numRows-1].position.addScaled(this.gemsToFall[a.i][this.numRows-1], new Vec3(0, 0.2, 0));
       this.gemsToRemove.shift();
       index--;
     }
@@ -118,10 +118,12 @@ Scene.prototype.update = function(gl, keysPressed) {
         fallingGems++;
         this.gameObjects[i][j].position.sub(new Vec3(0, fallingSpeed, 0));
         this.gemsToFall[i][j] -= 5 * fallingSpeed;
-        if (this.gemsToFall[i][j] <= 5 * fallingSpeed && !this.gemsToCheck.includes(this.gameObjects[i][j])) {
+        if (this.gemsToFall[i][j] <= 5 * fallingSpeed) {
             this.setLocation(i,j);
             this.gemsToFall[i][j] = 0;
-            this.gemsToCheck.push(this.gameObjects[i][j]);
+            if (this.gameObjects[i][j] != this.emptyGem && !this.gemsToCheck.includes(this.gameObjects[i][j])) {
+              this.gemsToCheck.push(this.gameObjects[i][j]);
+            }
         }
       }
     }
@@ -172,22 +174,34 @@ Scene.prototype.checkForLine = function(i,j) {
   var inRow = 1;
   var colsToRemove = [];
   colsToRemove.push(i);
-  for(var index = i + 1; index < this.numCols && this.gameObjects[index][j].gemType == thisGemType; index++) {
+  for(var index = i + 1; index < this.numCols &&
+                        this.gameObjects[index][j].gemType &&
+                        this.gameObjects[index][j].gemType == thisGemType;
+                        index++) {
     inRow++;
     colsToRemove.push(index);
   }
-  for(var index = i - 1; index >= 0 && this.gameObjects[index][j].gemType == thisGemType; index--) {
+  for(var index = i - 1; index >= 0 &&
+                         this.gameObjects[index][j].gemType &&
+                         this.gameObjects[index][j].gemType == thisGemType;
+                         index--) {
     inRow++;
     colsToRemove.push(index);
   }
   var inCol = 1;
   var rowsToRemove = [];
   rowsToRemove.push(j);
-  for(var index = j + 1; index < this.numRows && this.gameObjects[i][index].gemType == thisGemType; index++) {
+  for(var index = j + 1; index < this.numRows &&
+                         this.gameObjects[i][index].gemType &&
+                         this.gameObjects[i][index].gemType == thisGemType;
+                         index++) {
     inCol++;
     rowsToRemove.push(index);
   }
-  for(var index = j - 1; index >= 0 && this.gameObjects[i][index].gemType == thisGemType; index--) {
+  for(var index = j - 1; index >= 0 &&
+                         this.gameObjects[i][index].gemType &&
+                         this.gameObjects[i][index].gemType == thisGemType;
+                         index--) {
     inCol++;
     rowsToRemove.push(index);
   }
