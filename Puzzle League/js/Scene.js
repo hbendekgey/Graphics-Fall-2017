@@ -115,7 +115,7 @@ Scene.prototype.makeGemsFall = function() {
     } else if (a.fallen < 0.2) { // if they haven't fallen .2 yet...
       a.position.sub(new Vec3(0, fallingSpeed, 0));
       a.fallen += fallingSpeed;
-    } else {
+    } else if (!this.gameObjects[a.i][a.j-1].gemType) {
       // set this into the new position
       this.gameObjects[a.i][a.j-1] = a;
       this.gameObjects[a.i][a.j] = this.emptyGem;
@@ -293,7 +293,7 @@ Scene.prototype.swap = function() {
   let rightI = this.cursor.i+1;
   let j = this.cursor.j;
 
-  // not sure if this is necessary?
+  // maybe get rid of this once gems correctly know their space while falling
   if (j < this.numRows - 1 &&
       ((!this.gameObjects[leftI][j].gemType && this.gameObjects[leftI][j+1].falling) ||
       (!this.gameObjects[rightI][j].gemType && this.gameObjects[rightI][j+1].falling)))
@@ -308,13 +308,17 @@ Scene.prototype.swap = function() {
     this.gameObjects[leftI][j].falling = false;
     this.gameObjects[leftI][j].fallen = 0;
     this.swappingGems.push(this.gameObjects[leftI][j]);
-    this.queueAboveToFall(leftI,j,false);
+    if (this.gameObjects[leftI][j].gemType) {
+      this.queueAboveToFall(rightI,j,false);
+    }
 
     this.gameObjects[rightI][j].swapping = true;
     this.gameObjects[rightI][j].falling = false;
     this.gameObjects[rightI][j].fallen = 0;
     this.swappingGems.push(this.gameObjects[rightI][j]);
-    this.queueAboveToFall(rightI,j,false);
+    if (this.gameObjects[rightI][j].gemType) {
+      this.queueAboveToFall(leftI,j,false);
+    }
   }
 }
 
