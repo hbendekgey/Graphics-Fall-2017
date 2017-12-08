@@ -33,7 +33,7 @@ let Scene = function(gl) {
   this.emptyGem.draw = () => {};
 
   this.cursorGeometry = new CursorGeometry(gl);
-  this.cursor = new Cursor(this.cursorGeometry, this.staticMaterial, 5, 5);
+  this.cursor = new Cursor(this.cursorGeometry, this.staticMaterial, 3, 5, this.numRows, this.numCols);
   for (var i = 0; i < this.numCols; i++) {
     this.gameObjects.push([]);
     for (var j = 0; j < this.numRows; j++) {
@@ -83,6 +83,8 @@ Scene.prototype.queueAboveToFall = function(i,j,toFall) {
     } else {
       this.gameObjects[i][fallIndex].fallen = 0;
       this.setLocation(i,fallIndex);
+      this.gemsToCheck.push(this.gameObjects[i][fallIndex]);
+      this.gameObjects[i][fallIndex].toCheck = true;
     }
   }
 }
@@ -112,13 +114,18 @@ Scene.prototype.makeGemsFall = function() {
     if (!a.falling) {
       this.gemsToFall.splice(index, 1);
       index--;
+    } else if (a.fallen <= 0.1 && a.fallen + fallingSpeed > 0.1) {
+      if (!this.gameObjects[a.i][a.j-1].gemType) {
+        this.gameObjects[a.i][a.j-1] = a;
+        this.gameObjects[a.i][a.j] = this.emptyGem;
+        a.position.sub(new Vec3(0, fallingSpeed, 0));
+        a.fallen += fallingSpeed;
+      }
     } else if (a.fallen < 0.2) { // if they haven't fallen .2 yet...
       a.position.sub(new Vec3(0, fallingSpeed, 0));
       a.fallen += fallingSpeed;
-    } else if (!this.gameObjects[a.i][a.j-1].gemType) {
+    } else {
       // set this into the new position
-      this.gameObjects[a.i][a.j-1] = a;
-      this.gameObjects[a.i][a.j] = this.emptyGem;
       a.fallen = 0;
       this.setLocation(a.i,a.j-1); // this updates a.j <- a.j - 1 and puts it in correct place
       if (!this.shouldFall(a.i,a.j)) {
@@ -185,8 +192,8 @@ Scene.prototype.update = function(gl, keysPressed) {
     // this.queueAboveToFall(this.cursor.i,this.cursor.j,false);
     console.log(this.cursor.i + ", " + this.cursor.j);
     // console.log(this.shouldFall(this.cursor.i,this.cursor.j));
-    console.log(this.gameObjects[this.cursor.i][this.cursor.j].swapping);
-    // console.log(this.gameObjects[this.cursor.i][this.cursor.j].falling);
+    // console.log(this.gameObjects[this.cursor.i][this.cursor.j].swapping);
+    console.log(this.gameObjects[this.cursor.i][this.cursor.j].gemType);
   }
 
   // check gems that have been moved recently
@@ -221,51 +228,36 @@ Scene.prototype.update = function(gl, keysPressed) {
   this.cursor.draw(this.camera, timeAtThisFrame);
 };
 
+Scene.prototype.isValidAndSameType = function(i,j,gemType) {
+  if (i < this.numCols && i >= 0 && j < this.numRows && j >= 0) {
+    let gem = this.gameObjects[i][j];
+    return gem.gemType && !gem.falling && !gem.swapping && !gem.toRemove &&
+      gem.gemType == gemType;
+  }
+  return false;
+}
+
 Scene.prototype.checkForLine = function(i,j) {
   let thisGemType = this.gameObjects[i][j].gemType;
   var inRow = 1;
   var colsToRemove = [];
   colsToRemove.push(i);
-  for(var index = i + 1; index < this.numCols &&
-                        this.gameObjects[index][j].gemType &&
-                        !this.gameObjects[index][j].falling &&
-                        !this.gameObjects[index][j].swapping &&
-                        !this.gameObjects[index][j].toRemove &&
-                        this.gameObjects[index][j].gemType == thisGemType;
-                        index++) {
+  for(var index = i + 1; this.isValidAndSameType(index,j,thisGemType); index++) {
     inRow++;
     colsToRemove.push(index);
   }
-  for(var index = i - 1; index >= 0 &&
-                         this.gameObjects[index][j].gemType &&
-                         !this.gameObjects[index][j].falling &&
-                         !this.gameObjects[index][j].swapping &&
-                         !this.gameObjects[index][j].toRemove &&
-                         this.gameObjects[index][j].gemType == thisGemType;
-                         index--) {
+  for(var index = i - 1; this.isValidAndSameType(index,j,thisGemType); index--) {
     inRow++;
     colsToRemove.push(index);
   }
   var inCol = 1;
   var rowsToRemove = [];
   rowsToRemove.push(j);
-  for(var index = j + 1; index < this.numRows &&
-                         this.gameObjects[i][index].gemType &&
-                         !this.gameObjects[i][index].falling &&
-                         !this.gameObjects[i][index].swapping &&
-                         !this.gameObjects[i][index].toRemove &&
-                         this.gameObjects[i][index].gemType == thisGemType;
-                         index++) {
+  for(var index = j + 1; this.isValidAndSameType(i,index,thisGemType); index++) {
     inCol++;
     rowsToRemove.push(index);
   }
-  for(var index = j - 1; index >= 0 &&
-                         this.gameObjects[i][index].gemType &&
-                         !this.gameObjects[i][index].falling &&
-                         !this.gameObjects[i][index].swapping &&
-                         !this.gameObjects[i][index].toRemove &&
-                         this.gameObjects[i][index].gemType == thisGemType;
-                         index--) {
+  for(var index = j - 1; this.isValidAndSameType(i,index,thisGemType); index--) {
     inCol++;
     rowsToRemove.push(index);
   }
@@ -293,30 +285,26 @@ Scene.prototype.swap = function() {
   let rightI = this.cursor.i+1;
   let j = this.cursor.j;
 
-  // maybe get rid of this once gems correctly know their space while falling
-  if (j < this.numRows - 1 &&
-      ((!this.gameObjects[leftI][j].gemType && this.gameObjects[leftI][j+1].falling) ||
-      (!this.gameObjects[rightI][j].gemType && this.gameObjects[rightI][j+1].falling)))
-      {
-    return;
-  }
+  let leftGem = this.gameObjects[leftI][j];
+  let rightGem = this.gameObjects[rightI][j];
 
   // only allow swaps to happen if neither is queued to be removed or swapping
-  if (!this.gameObjects[leftI][j].toRemove && !this.gameObjects[rightI][j].toRemove &&
-      !this.gameObjects[leftI][j].swapping && !this.gameObjects[rightI][j].swapping) {
-    this.gameObjects[leftI][j].swapping = true;
-    this.gameObjects[leftI][j].falling = false;
-    this.gameObjects[leftI][j].fallen = 0;
-    this.swappingGems.push(this.gameObjects[leftI][j]);
-    if (this.gameObjects[leftI][j].gemType) {
+  if (!leftGem.toRemove && !rightGem.toRemove &&
+      !leftGem.swapping && !rightGem.swapping) {
+
+    leftGem.swapping = true;
+    leftGem.falling = false;
+    leftGem.fallen = 0;
+    this.swappingGems.push(leftGem);
+    if (leftGem.gemType) {
       this.queueAboveToFall(rightI,j,false);
     }
 
-    this.gameObjects[rightI][j].swapping = true;
-    this.gameObjects[rightI][j].falling = false;
-    this.gameObjects[rightI][j].fallen = 0;
-    this.swappingGems.push(this.gameObjects[rightI][j]);
-    if (this.gameObjects[rightI][j].gemType) {
+    rightGem.swapping = true;
+    rightGem.falling = false;
+    rightGem.fallen = 0;
+    this.swappingGems.push(rightGem);
+    if (rightGem.gemType) {
       this.queueAboveToFall(leftI,j,false);
     }
   }
@@ -326,7 +314,14 @@ Scene.prototype.finishSwap = function(oldLeftGem,oldRightGem) {
   if (!oldLeftGem.gemType && !oldRightGem.gemType) {
     return;
   }
-  // below is to handle if one of the gems is empty
+
+  if (oldLeftGem.falling && oldLeftGem.fallen > 0.1) {
+    oldLeftGem.j--;
+  }
+
+  if (oldRightGem.falling && oldRightGem.fallen > 0.1) {
+    oldRightGem.j--;
+  }  // below is to handle if one of the gems is empty
   const rightI = oldRightGem.i || (oldLeftGem.i + 1);
   const leftI = rightI - 1;
   const j = oldLeftGem.j || oldRightGem.j;
@@ -338,8 +333,6 @@ Scene.prototype.finishSwap = function(oldLeftGem,oldRightGem) {
   let leftGem = oldRightGem;
   let rightGem = oldLeftGem;
 
-  // this is the problem I think (if one of the gems is empty)
-
   if (!leftGem.gemType) {
     this.queueAboveToFall(leftI,j,true);
   } else {
@@ -350,6 +343,7 @@ Scene.prototype.finishSwap = function(oldLeftGem,oldRightGem) {
       this.queueAboveToFall(leftI,j,true);
     } else {
       this.gemsToCheck.push(leftGem);
+      leftGem.toCheck = true;
     }
   }
 
@@ -363,6 +357,7 @@ Scene.prototype.finishSwap = function(oldLeftGem,oldRightGem) {
       this.queueAboveToFall(rightI,j,true);
     } else {
       this.gemsToCheck.push(rightGem);
+      rightGem.toCheck = true;
     }
   }
 }

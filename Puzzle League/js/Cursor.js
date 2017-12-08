@@ -1,8 +1,10 @@
 "use strict";
-let Cursor = function(geometry, material, i, j) {
+let Cursor = function(geometry, material, i, j, numRows, numCols) {
   this.i = i;
   this.j = j;
   this.lastMove = 0;
+  this.numRows = numRows;
+  this.numCols = numCols;
 
   this.cursors = [];
   for (let k = 0; k < 4; k++) {
@@ -30,6 +32,12 @@ Cursor.prototype.resetTimer = function() {
 }
 
 Cursor.prototype.move = function(dx, dy, t) {
+  if (this.i + dx >= this.numCols - 1 || this.i + dx < 0) {
+    dx = 0;
+  }
+  if (this.j + dy >= this.numRows - 1 || this.j + dy < 0) {
+    dy = 0;
+  }
   if (t - this.lastMove > 200) {
     this.lastMove = t;
     for (let k = 0; k < this.cursors.length; k++) {
