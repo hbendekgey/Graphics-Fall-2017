@@ -89,6 +89,28 @@ Scene.prototype.queueAboveToFall = function(i,j,toFall) {
   }
 }
 
+Scene.prototype.swapGems = function() {
+  let swappingSpeed = 0.02;
+  for (var index = 0; index < this.swappingGems.length; index+=2) {
+    let a = this.swappingGems[index];
+    let b = this.swappingGems[index+1];
+    if (a.swapped < 0.2) { // if they haven't swapped .2 yet...
+      a.position.add(new Vec3(swappingSpeed, 0, 0));
+      a.swapped += swappingSpeed;
+      b.position.sub(new Vec3(swappingSpeed, 0, 0));
+      b.swapped += swappingSpeed;
+    } else {
+      a.swapping = false;
+      a.swapped = 0;
+      b.swapping = false;
+      b.swapped = 0;
+      this.finishSwap(a,b);
+      this.swappingGems.splice(index, 2);
+      index-=2;
+    }
+  }
+}
+
 Scene.prototype.removeGems = function() {
   // if any gems are in set to be removed, slowly shrink and rotate them.
   // If shrinking is done, set all gems above to fall
@@ -150,56 +172,7 @@ Scene.prototype.checkGems = function() {
   }
 }
 
-Scene.prototype.update = function(gl, keysPressed) {
-
-  //jshint bitwise:false
-  //jshint unused:false
-  let timeAtThisFrame = new Date().getTime();
-  let dt = (timeAtThisFrame - this.timeAtLastFrame) / 1000.0;
-  this.timeAtLastFrame = timeAtThisFrame;
-  this.heartMaterial.time.add(dt);
-
-  // clear the screen
-  gl.clearColor(0.2, 0, 0.2, 1.0);
-  gl.clearDepth(0);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  let swappingSpeed = 0.02;
-  for (var index = 0; index < this.swappingGems.length; index+=2) {
-    let a = this.swappingGems[index];
-    let b = this.swappingGems[index+1];
-    if (a.swapped < 0.2) { // if they haven't swapped .2 yet...
-      a.position.add(new Vec3(swappingSpeed, 0, 0));
-      a.swapped += swappingSpeed;
-      b.position.sub(new Vec3(swappingSpeed, 0, 0));
-      b.swapped += swappingSpeed;
-    } else {
-      a.swapping = false;
-      a.swapped = 0;
-      b.swapping = false;
-      b.swapped = 0;
-      this.finishSwap(a,b);
-      this.swappingGems.splice(index, 2);
-      index-=2;
-    }
-  }
-
-  this.removeGems();
-
-  this.makeGemsFall();
-
-  if (keysPressed.SHIFT) {
-    // this.queueAboveToFall(this.cursor.i,this.cursor.j,false);
-    console.log(this.cursor.i + ", " + this.cursor.j);
-    // console.log(this.shouldFall(this.cursor.i,this.cursor.j));
-    // console.log(this.gameObjects[this.cursor.i][this.cursor.j].swapping);
-    console.log(this.gameObjects[this.cursor.i][this.cursor.j].gemType);
-  }
-
-  // check gems that have been moved recently
-  this.checkGems();
-
-  // move the cursor
+Scene.prototype.moveCursor = function(keysPressed, timeAtThisFrame) {
   let dx = 0;
   let dy = 0;
   if (keysPressed.UP) {
@@ -217,15 +190,41 @@ Scene.prototype.update = function(gl, keysPressed) {
   if (dx != 0 || dy != 0) {
     this.cursor.move(dx, dy, timeAtThisFrame);
   }
+}
 
-  // draw all gems, rotating the gears and deleting some if quaking
+Scene.prototype.draw = function(timeAtThisFrame) {
   for (var i = 0; i < this.gameObjects.length; i++) {
     for (var j = 0; j < this.gameObjects[i].length; j++) {
       this.gameObjects[i][j].draw(this.camera);
     }
   }
-
   this.cursor.draw(this.camera, timeAtThisFrame);
+}
+
+Scene.prototype.update = function(gl, keysPressed) {
+
+  //jshint bitwise:false
+  //jshint unused:false
+  let timeAtThisFrame = new Date().getTime();
+  let dt = (timeAtThisFrame - this.timeAtLastFrame) / 1000.0;
+  this.timeAtLastFrame = timeAtThisFrame;
+  this.heartMaterial.time.add(dt);
+
+  // clear the screen
+  gl.clearColor(0.2, 0, 0.2, 1.0);
+  gl.clearDepth(0);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  this.swapGems();
+  this.removeGems();
+  this.makeGemsFall();
+  this.checkGems();
+  this.moveCursor(keysPressed, timeAtThisFrame);
+  this.draw(timeAtThisFrame);
+  // if (keysPressed.SHIFT) {
+  //   console.log(this.cursor.i + ", " + this.cursor.j);
+  //   console.log(this.gameObjects[this.cursor.i][this.cursor.j].gemType);
+  // }
 };
 
 Scene.prototype.isValidAndSameType = function(i,j,gemType) {
