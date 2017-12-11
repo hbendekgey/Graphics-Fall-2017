@@ -229,6 +229,26 @@ Scene.prototype.pushAllGemsUp = function () {
   this.nextRow = [];
 }
 
+Scene.prototype.rise = function(dt) {
+  if (!this.nextRow.length) {
+    for (var i = 0; i < this.numCols; i++) {
+      this.nextRow[i] = this.setNewGem();
+      this.nextRow[i].i = i;
+      this.nextRow[i].j = -1;
+      this.nextRow[i].position.set().addScaled(i, new Vec3(0.2, 0, 0)).sub(new Vec3(0, 0.2, 0));
+    }
+  }
+
+  let risingSpeed = 0.05 * dt;
+  console.log(this.camera.position.y);
+  if (this.camera.position.y >= 0.9 && this.camera.position.y - risingSpeed < 0.9) {
+      this.camera.position.set(new Vec3(1.5, 1.1, 0));
+      this.pushAllGemsUp();
+  }
+  this.camera.position.sub(new Vec3(0,risingSpeed,0));
+  this.camera.updateViewProjMatrix();
+}
+
 Scene.prototype.update = function(gl, keysPressed) {
 
   //jshint bitwise:false
@@ -248,27 +268,8 @@ Scene.prototype.update = function(gl, keysPressed) {
   this.makeGemsFall(dt);
   this.checkGems();
   this.moveCursor(keysPressed, timeAtThisFrame);
+  this.rise(dt);
   this.draw(timeAtThisFrame);
-
-  if (!this.nextRow.length) {
-    for (var i = 0; i < this.numCols; i++) {
-      this.nextRow[i] = this.setNewGem();
-      this.nextRow[i].i = i;
-      this.nextRow[i].j = -1;
-      this.nextRow[i].position.set().addScaled(i, new Vec3(0.2, 0, 0)).sub(new Vec3(0, 0.2, 0));
-    }
-  }
-
-  let risingSpeed = 0.05 * dt;
-  console.log(this.camera.position.y);
-  if (this.camera.position.y >= 0.9 && this.camera.position.y - risingSpeed < 0.9) {
-      this.camera.position.set(new Vec3(1.5, 1.1, 0));
-      this.pushAllGemsUp();
-  }
-  this.camera.position.sub(new Vec3(0,risingSpeed,0));
-  this.camera.updateViewProjMatrix();
-
-
 };
 
 Scene.prototype.isValidAndSameType = function(i,j,gemType) {
