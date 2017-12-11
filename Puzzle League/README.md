@@ -1,4 +1,4 @@
-This is the (almost) complete form of 1-player Puzzle League.
+This is a WIP of 1-player Puzzle League.
 I worked on it for ~10 hours.
 
 I implemented:
