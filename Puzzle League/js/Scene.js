@@ -332,6 +332,9 @@ Scene.prototype.swap = function() {
   let leftGem = this.gameObjects[leftI][j];
   let rightGem = this.gameObjects[rightI][j];
 
+  if (leftGem.falling && rightGem.falling) {
+    return;
+  }
   // only allow swaps to happen if neither is queued to be removed or swapping
   if (!leftGem.toRemove && !rightGem.toRemove &&
       !leftGem.swapping && !rightGem.swapping) {
@@ -361,7 +364,7 @@ Scene.prototype.finishSwap = function(oldLeftGem,oldRightGem) {
 
   const rightI = oldRightGem.i || (oldLeftGem.i + 1);
   const leftI = rightI - 1;
-  const j = oldLeftGem.j || oldRightGem.j;
+  const j = ((oldLeftGem.j + 1) || (oldRightGem.j + 1)) - 1;
 
   if (oldLeftGem.falling && oldLeftGem.fallen > 0.1) {
     oldLeftGem.j--;
