@@ -232,6 +232,10 @@ Scene.prototype.pushAllGemsUp = function () {
 Scene.prototype.rise = function(dt) {
   if (!this.nextRow.length) {
     for (var i = 0; i < this.numCols; i++) {
+      if (this.gameObjects[i][this.numRows - 1].gemType) {
+        this.update = function() {};
+        return;
+      }
       this.nextRow[i] = this.setNewGem();
       this.nextRow[i].i = i;
       this.nextRow[i].j = -1;
@@ -240,7 +244,6 @@ Scene.prototype.rise = function(dt) {
   }
 
   let risingSpeed = 0.05 * dt;
-  console.log(this.camera.position.y);
   if (this.camera.position.y >= 0.9 && this.camera.position.y - risingSpeed < 0.9) {
       this.camera.position.set(new Vec3(1.5, 1.1, 0));
       this.pushAllGemsUp();
